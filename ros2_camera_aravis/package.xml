@@ -2,15 +2,46 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ros2_camera_aravis</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="root@todo.todo">root</maintainer>
+  <version>0.1.0</version>
+  <description>ros2_camera_aravis: A complete and comfortable GenICam (USB3Vision and GigEVision) based camera driver for ROS2 (ethernet and usb).</description>
+  <maintainer email="Manu.Lange@plantandfood.co.nz">Manu Lange, The New Zealand Institute for Plant and Food Research Limited</maintainer>
+
+  <author email="Manu.Lange@plantandfood.co.nz">Manu Lange, The New Zealand Institute for Plant and Food Research Limited</author>
+  <author email="dominik.kleiser@iosb.fraunhofer.de">Dominik Kleiser, Fraunhofer IOSB</author>
+  <author email="dominik.klein@fkie.fraunhofer.de">Dominik A. Klein, Fraunhofer FKIE</author>
+  <author email="stevesafarik@gmail.com">Steve Safarik, Straw Lab</author>
+  <author email="andrew.straw@imp.ac.at">Andrew Straw, Straw Lab</author>
+  <author email="fvanbreugel@unr.edu">Floris van Breugel, van Breugel Lab</author>
+
+  <url type="website">https://github.com/nznobody/camera_aravis</url>
+  <url type="website">https://github.com/AravisProject/aravis</url>
+
   <license>Apache-2.0</license>
 
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nodelet</depend>
+  <depend>image_transport</depend>
+  <depend>camera_info_manager</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>tf</depend>
+  <depend>tf2_ros</depend>
+  <depend>aravis</depend>
+
+  <build_depend>aravis-dev</build_depend>
+  <build_depend>libglib-dev</build_depend>
+  <build_depend>message_generation</build_depend>
+
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+  
+  <exec_depend>rosidl_default_runtime</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
   <export>
     <build_type>ament_cmake</build_type>
