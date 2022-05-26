@@ -1,6 +1,5 @@
-bin
-build
-cfg/CameraAravisConfig.cfgc
-cfg/cpp
-docs
-src/camera_aravis
+build/
+install/
+log/
+tmp/
+.venv/
