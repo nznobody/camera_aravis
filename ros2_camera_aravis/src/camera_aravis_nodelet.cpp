@@ -22,10 +22,10 @@
  *
  ****************************************************************************/
 
-#include "../include/camera_aravis/camera_aravis_nodelet.h"
+#include <ros2_camera_aravis/camera_aravis_nodelet.h>
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(camera_aravis::CameraAravisNodelet, nodelet::Nodelet)
+// #include <pluginlib/class_list_macros.h>
+// PLUGINLIB_EXPORT_CLASS(camera_aravis::CameraAravisNodelet, nodelet::Nodelet)
 
 namespace camera_aravis
 {

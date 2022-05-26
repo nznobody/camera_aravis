@@ -2,5 +2,6 @@
     "terminal.integrated.env.linux": {
         "PYTHONPATH": "/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages",
         "PATH": "/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/ros2_camera_aravis",
 }

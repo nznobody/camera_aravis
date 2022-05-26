@@ -26,7 +26,7 @@
 #define INCLUDE_CAMERA_ARAVIS_CAMERA_ARAVIS_NODELET_H_
 
 extern "C" {
-#include <arv.h>
+  #include <arv.h>
 }
 
 #include <iostream>
@@ -61,18 +61,18 @@ extern "C" {
 #include <tf/transform_listener.h>
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
-#include <camera_aravis/CameraAravisConfig.h>
-#include <camera_aravis/CameraAutoInfo.h>
-#include <camera_aravis/ExtendedCameraInfo.h>
+#include <ros2_camera_aravis/CameraAravisConfig.h>
+#include <ros2_camera_aravis/CameraAutoInfo.h>
+#include <ros2_camera_aravis/ExtendedCameraInfo.h>
 
-#include <camera_aravis/get_integer_feature_value.h>
-#include <camera_aravis/set_integer_feature_value.h>
-#include <camera_aravis/get_float_feature_value.h>
-#include <camera_aravis/set_float_feature_value.h>
-#include <camera_aravis/get_string_feature_value.h>
-#include <camera_aravis/set_string_feature_value.h>
-#include <camera_aravis/get_boolean_feature_value.h>
-#include <camera_aravis/set_boolean_feature_value.h>
+#include <ros2_camera_aravis/get_integer_feature_value.h>
+#include <ros2_camera_aravis/set_integer_feature_value.h>
+#include <ros2_camera_aravis/get_float_feature_value.h>
+#include <ros2_camera_aravis/set_float_feature_value.h>
+#include <ros2_camera_aravis/get_string_feature_value.h>
+#include <ros2_camera_aravis/set_string_feature_value.h>
+#include <ros2_camera_aravis/get_boolean_feature_value.h>
+#include <ros2_camera_aravis/set_boolean_feature_value.h>
 
 #include "camera_buffer_pool.h"
 
