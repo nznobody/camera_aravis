@@ -3,5 +3,31 @@
         "PYTHONPATH": "/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages",
         "PATH": "/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
     },
-    "cmake.sourceDirectory": "${workspaceFolder}/ros2_camera_aravis",
+    "terminal.integrated.defaultProfile.linux": "ros",
+    "terminal.integrated.profiles.linux" :{
+        "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+        },
+        "ros": {
+            "path": "bash",
+            "args": ["-l"],
+            "icon": "terminal-bash"
+        },
+        "zsh": {
+            "path": "zsh"
+        },
+        "fish": {
+            "path": "fish"
+        },
+        "tmux": {
+            "path": "tmux",
+            "icon": "terminal-tmux"
+        },
+        "pwsh": {
+            "path": "pwsh",
+            "icon": "terminal-powershell"
+        }
+    },
+    "cmake.configureOnEdit": false
 }

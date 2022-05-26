@@ -1,106 +1,80 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
+project(ros2_camera_aravis)
+include(FindPkgConfig)
 
-project(camera_aravis)
+set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+message(TRACE "testing")
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  nodelet
-  std_msgs
-  sensor_msgs
-  message_generation
-  image_transport
-  camera_info_manager
-  dynamic_reconfigure
-  tf
-  tf2_ros
+# find dependencies
+find_package(ament_cmake REQUIRED)
+# uncomment the following section in order to fill in
+# further dependencies manually.
+# find_package(<dependency> REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(camera_info_manager REQUIRED)
+find_package(tf2 REQUIRED)
+
+pkg_search_module(ARAVIS REQUIRED aravis-0.8 aravis-0.6 aravis-0.4 aravis-0.2)
+pkg_check_modules(GLIB REQUIRED glib-2.0)
+
+#${CMAKE_CURRENT_SOURCE_DIR}/
+
+file(GLOB msg_files
+  RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/"
+  "msg/*.msg"
 )
-find_package(Aravis REQUIRED)
-find_package(GLIB2 REQUIRED)
-
-generate_dynamic_reconfigure_options(cfg/CameraAravis.cfg)
-
-add_message_files(
-   FILES
-   CameraAutoInfo.msg
-   ExtendedCameraInfo.msg
-)
-
-add_service_files(
-  FILES
-  get_boolean_feature_value.srv
-  get_float_feature_value.srv
-  get_integer_feature_value.srv
-  get_string_feature_value.srv
-  set_boolean_feature_value.srv
-  set_float_feature_value.srv
-  set_integer_feature_value.srv
-  set_string_feature_value.srv
+file(GLOB srv_files
+  RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/"
+  "srv/*.srv"
 )
 
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-   sensor_msgs
+message(TRACE "Message files found: ${msg_files}")
+message(TRACE "Service files found: ${srv_files}")
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+  ${srv_files}
+  DEPENDENCIES builtin_interfaces std_msgs sensor_msgs
+)
+ament_export_dependencies(rosidl_default_runtime)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # comment the line when a copyright and license is added to all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # comment the line when this package is in a git repo and when
+  # a copyright and license is added to all source files
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+include_directories(
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  ${ARAVIS_INCLUDE_DIRS}
+  ${GLIB_INCLUDE_DIRS}
 )
 
-catkin_package(
-    DEPENDS Aravis GLIB2
-    CATKIN_DEPENDS roscpp nodelet std_msgs sensor_msgs message_runtime image_transport camera_info_manager dynamic_reconfigure tf tf2_ros
-    INCLUDE_DIRS
-    LIBRARIES
-)
-
-include_directories(cfg
-  ${catkin_INCLUDE_DIRS}
-  ${Aravis_INCLUDE_DIRS}
-  ${GLIB2_INCLUDE_DIRS})
-
-set(LIBRARIES
-  ${catkin_LIBRARIES}
-  ${Aravis_LIBRARIES}
-  glib-2.0
-  gmodule-2.0
-  gobject-2.0
-)
-
-add_library(${PROJECT_NAME}
+add_executable("${PROJECT_NAME}-node"
   src/camera_aravis_nodelet.cpp
   src/camera_buffer_pool.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(cam_aravis
-  src/camera_aravis_node.cpp
+target_include_directories("${PROJECT_NAME}-node"
+  PUBLIC
+  ${GLIB_INCLUDE_DIRS}
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(cam_aravis ${PROJECT_NAME} ${LIBRARIES})
-add_dependencies(cam_aravis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ament_target_dependencies("${PROJECT_NAME}-node" rclcpp std_msgs sensor_msgs)
 
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
-)
-
-install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-)
-
-install(TARGETS cam_aravis
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-install(DIRECTORY launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-  FILES_MATCHING PATTERN "*.launch"
-  PATTERN ".svn" EXCLUDE
-)
-
-install(FILES
-  nodelet_plugins.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+ament_package()

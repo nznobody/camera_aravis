@@ -22,7 +22,7 @@
  *
  ****************************************************************************/
 
-#include "../include/camera_aravis/camera_buffer_pool.h"
+#include "ros2_camera_aravis/camera_buffer_pool.h"
 
 namespace camera_aravis
 {

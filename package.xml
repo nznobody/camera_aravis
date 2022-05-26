@@ -1,9 +1,9 @@
-<?xml version="2.0"?>
-<package format="2">
-  <name>ros2-camera-aravis</name>
-  <version>4.0.0</version>
-  <description>camera_aravis: A complete and comfortable GenICam (USB3Vision and GigEVision) based camera driver for ROS2 (ethernet and usb).</description>
-
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>ros2_camera_aravis</name>
+  <version>0.1.0</version>
+  <description>ros2_camera_aravis: A complete and comfortable GenICam (USB3Vision and GigEVision) based camera driver for ROS2 (ethernet and usb).</description>
   <maintainer email="Manu.Lange@plantandfood.co.nz">Manu Lange, The New Zealand Institute for Plant and Food Research Limited</maintainer>
 
   <author email="Manu.Lange@plantandfood.co.nz">Manu Lange, The New Zealand Institute for Plant and Food Research Limited</author>
@@ -13,31 +13,32 @@
   <author email="andrew.straw@imp.ac.at">Andrew Straw, Straw Lab</author>
   <author email="fvanbreugel@unr.edu">Floris van Breugel, van Breugel Lab</author>
 
-  <license>LGPL v2</license>
-
   <url type="website">https://github.com/nznobody/camera_aravis</url>
   <url type="website">https://github.com/AravisProject/aravis</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <license>Apache-2.0</license>
 
-  <depend>roscpp</depend>
-  <depend>nodelet</depend>
+  <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>image_transport</depend>
   <depend>camera_info_manager</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>tf</depend>
-  <depend>tf2_ros</depend>
-  <depend>aravis</depend>
+  <depend>tf2</depend>
 
-  <build_depend>aravis-dev</build_depend>
-  <build_depend>libglib-dev</build_depend> <!-- Bugfix: Missing dependency in Debian Buster -->
-  <build_depend>message_generation</build_depend>
-  <exec_depend>message_runtime</exec_depend>
+  <build_depend>libglib-dev</build_depend>
+  <!-- TODO: How to add aravis 0.8: https://github.com/ros/rosdistro/blob/master/rosdep/base.yaml -->
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+  
+  <exec_depend>rosidl_default_runtime</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
   <export>
-    <nodelet plugin="${prefix}/nodelet_plugins.xml" />
+    <build_type>ament_cmake</build_type>
   </export>
-
 </package>

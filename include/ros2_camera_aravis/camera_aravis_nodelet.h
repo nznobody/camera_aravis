@@ -44,14 +44,14 @@ extern "C" {
 
 #include <glib.h>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <nodelet/nodelet.h>
 #include <nodelet/NodeletUnload.h>
 #include <ros/time.h>
 #include <ros/duration.h>
-#include <sensor_msgs/Image.h>
-#include <std_msgs/Int64.h>
-#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/msg/image.hpp>
+#include <std_msgs/msg/int64.hpp>
+#include <sensor_msgs/msg/image_encodings.hpp>
 #include <image_transport/image_transport.h>
 #include <camera_info_manager/camera_info_manager.h>
 #include <boost/algorithm/string/trim.hpp>

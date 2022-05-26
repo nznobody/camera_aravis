@@ -37,15 +37,17 @@
 // rosparam set camnode/GainAuto 1
 //
 
-
-#include <nodelet/loader.h>
+#include "rclcpp/rclcpp.hpp"
+// #include <nodelet/loader.h>
 #include "../include/camera_aravis/camera_aravis_nodelet.h"
 
 
 int main(int argc, char** argv) 
 {
-	ros::init(argc, argv, "camera_aravis");
-	nodelet::Loader manager(ros::NodeHandle("~"));
+	// ros::init(argc, argv, "camera_aravis");
+	rclcpp::init(argc, argv, "ros2_camera_aravis");
+    auto node = rclcpp::Node::make_shared("~");
+	nodelet::Loader manager(ros::NodeHandle("CameraAravisNodelet"));
 	nodelet::M_string remap(ros::names::getRemappings());
 	nodelet::V_string nargv;
 	manager.load(ros::this_node::getName(), "camera_aravis/CameraAravisNodelet", remap, nargv);

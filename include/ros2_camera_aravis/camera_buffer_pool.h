@@ -25,17 +25,15 @@
 #ifndef INCLUDE_CAMERA_ARAVIS_CAMERA_BUFFER_POOL_H_
 #define INCLUDE_CAMERA_ARAVIS_CAMERA_BUFFER_POOL_H_
 
-extern "C" {
 #include <arv.h>
-}
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
 
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/msg/image.h>
 
 #include <mutex>
 #include <map>
