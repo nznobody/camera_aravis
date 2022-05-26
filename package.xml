@@ -1,11 +1,12 @@
-<?xml version="1.0"?>
+<?xml version="2.0"?>
 <package format="2">
-  <name>camera_aravis</name>
+  <name>ros2-camera-aravis</name>
   <version>4.0.0</version>
-  <description>camera_aravis: A complete and comfortable GenICam (USB3Vision and GigEVision) based camera driver for ROS (ethernet and usb).</description>
+  <description>camera_aravis: A complete and comfortable GenICam (USB3Vision and GigEVision) based camera driver for ROS2 (ethernet and usb).</description>
 
-  <maintainer email="dominik.kleiser@iosb.fraunhofer.de">Dominik Kleiser, Fraunhofer IOSB</maintainer>
+  <maintainer email="Manu.Lange@plantandfood.co.nz">Manu Lange, The New Zealand Institute for Plant and Food Research Limited</maintainer>
 
+  <author email="Manu.Lange@plantandfood.co.nz">Manu Lange, The New Zealand Institute for Plant and Food Research Limited</author>
   <author email="dominik.kleiser@iosb.fraunhofer.de">Dominik Kleiser, Fraunhofer IOSB</author>
   <author email="dominik.klein@fkie.fraunhofer.de">Dominik A. Klein, Fraunhofer FKIE</author>
   <author email="stevesafarik@gmail.com">Steve Safarik, Straw Lab</author>
@@ -14,7 +15,7 @@
 
   <license>LGPL v2</license>
 
-  <url type="website">https://github.com/FraunhoferIOSB/camera_aravis</url>
+  <url type="website">https://github.com/nznobody/camera_aravis</url>
   <url type="website">https://github.com/AravisProject/aravis</url>
 
   <buildtool_depend>catkin</buildtool_depend>
