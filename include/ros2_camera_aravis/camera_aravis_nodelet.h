@@ -225,7 +225,7 @@ protected:
   // Extra stream options for GigEVision streams.
   void tuneGvStream(ArvGvStream *p_stream);
 
-  void rosReconfigureCallback(Config &config, uint32_t level);
+  // void rosReconfigureCallback(Config &config, uint32_t level);
 
   // Start and stop camera on demand
   void rosConnectCallback();
@@ -239,30 +239,30 @@ protected:
   // Clean-up if aravis device is lost
   static void controlLostCallback(ArvDevice *p_gv_device, gpointer can_instance);
 
-  // Services
-  ros::ServiceServer get_integer_service_;
-  bool getIntegerFeatureCallback(camera_aravis::get_integer_feature_value::Request& request, camera_aravis::get_integer_feature_value::Response& response);
+  // // Services
+  // ros::ServiceServer get_integer_service_;
+  // bool getIntegerFeatureCallback(ros2_camera_aravis::srv::GetIntegerFeatureValue::Request& request, ros2_camera_aravis::srv::GetIntegerFeatureValue::Response& response);
 
-  ros::ServiceServer get_float_service_;
-  bool getFloatFeatureCallback(camera_aravis::get_float_feature_value::Request& request, camera_aravis::get_float_feature_value::Response& response);
+  // ros::ServiceServer get_float_service_;
+  // bool getFloatFeatureCallback(ros2_camera_aravis::srv::GetFloatFeatureValue::Request& request, ros2_camera_aravis::srv::GetFloatFeatureValue::Response& response);
 
-  ros::ServiceServer get_string_service_;
-  bool getStringFeatureCallback(camera_aravis::get_string_feature_value::Request& request, camera_aravis::get_string_feature_value::Response& response);
+  // ros::ServiceServer get_string_service_;
+  // bool getStringFeatureCallback(ros2_camera_aravis::srv::GetStringFeatureValue::Request& request, ros2_camera_aravis::srv::GetStringFeatureValue::Response& response);
 
-  ros::ServiceServer get_boolean_service_;
-  bool getBooleanFeatureCallback(camera_aravis::get_boolean_feature_value::Request& request, camera_aravis::get_boolean_feature_value::Response& response);
+  // ros::ServiceServer get_boolean_service_;
+  // bool getBooleanFeatureCallback(ros2_camera_aravis::srv::GetBooleanFeatureValue::Request& request, ros2_camera_aravis::srv::GetBooleanFeatureValue::Response& response);
 
-  ros::ServiceServer set_integer_service_;
-  bool setIntegerFeatureCallback(camera_aravis::set_integer_feature_value::Request& request, camera_aravis::set_integer_feature_value::Response& response);
+  // ros::ServiceServer set_integer_service_;
+  // bool setIntegerFeatureCallback(ros2_camera_aravis::srv::SetIntegerFeatureValue::Request& request, ros2_camera_aravis::srv::SetIntegerFeatureValue::Response& response);
 
-  ros::ServiceServer set_float_service_;
-  bool setFloatFeatureCallback(camera_aravis::set_float_feature_value::Request& request, camera_aravis::set_float_feature_value::Response& response);
+  // ros::ServiceServer set_float_service_;
+  // bool setFloatFeatureCallback(ros2_camera_aravis::srv::SetFloatFeatureValue::Request& request, ros2_camera_aravis::srv::SetFloatFeatureValue::Response& response);
 
-  ros::ServiceServer set_string_service_;
-  bool setStringFeatureCallback(camera_aravis::set_string_feature_value::Request& request, camera_aravis::set_string_feature_value::Response& response);
+  // ros::ServiceServer set_string_service_;
+  // bool setStringFeatureCallback(ros2_camera_aravis::srv::SetStringFeatureValue::Request& request, ros2_camera_aravis::srv::SetStringFeatureValue::Response& response);
 
-  ros::ServiceServer set_boolean_service_;
-  bool setBooleanFeatureCallback(camera_aravis::set_boolean_feature_value::Request& request, camera_aravis::set_boolean_feature_value::Response& response);
+  // ros::ServiceServer set_boolean_service_;
+  // bool setBooleanFeatureCallback(ros2_camera_aravis::srv::SetBooleanFeatureValue::Request& request, ros2_camera_aravis::srv::SetBooleanFeatureValue::Response& response);
 
   // triggers a shot at regular intervals, sleeps in between
   void softwareTriggerLoop();

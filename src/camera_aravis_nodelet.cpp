@@ -798,60 +798,60 @@ void CameraAravisNodelet::onInit()
   // reconfigure_server_->setCallback(std::bind(&CameraAravisNodelet::rosReconfigureCallback, this, _1, _2));
 
   // Print information.
-  RCLCPP_INFO(rclcpp::get_logger(),("    Using Camera Configuration:");
-  RCLCPP_INFO(rclcpp::get_logger(),("    ---------------------------");
-  RCLCPP_INFO(rclcpp::get_logger(),("    Vendor name          = %s", arv_device_get_string_feature_value(p_device_, "DeviceVendorName"));
-  RCLCPP_INFO(rclcpp::get_logger(),("    Model name           = %s", arv_device_get_string_feature_value(p_device_, "DeviceModelName"));
-  RCLCPP_INFO(rclcpp::get_logger(),("    Device id            = %s", arv_device_get_string_feature_value(p_device_, "DeviceUserID"));
-  RCLCPP_INFO(rclcpp::get_logger(),("    Serial number        = %s", arv_device_get_string_feature_value(p_device_, "DeviceSerialNumber"));
-  RCLCPP_INFO(rclcpp::get_logger(),(
+  RCLCPP_INFO(rclcpp::get_logger(),"    Using Camera Configuration:");
+  RCLCPP_INFO(rclcpp::get_logger(),"    ---------------------------");
+  RCLCPP_INFO(rclcpp::get_logger(),"    Vendor name          = %s", arv_device_get_string_feature_value(p_device_, "DeviceVendorName"));
+  RCLCPP_INFO(rclcpp::get_logger(),"    Model name           = %s", arv_device_get_string_feature_value(p_device_, "DeviceModelName"));
+  RCLCPP_INFO(rclcpp::get_logger(),"    Device id            = %s", arv_device_get_string_feature_value(p_device_, "DeviceUserID"));
+  RCLCPP_INFO(rclcpp::get_logger(),"    Serial number        = %s", arv_device_get_string_feature_value(p_device_, "DeviceSerialNumber"));
+  RCLCPP_INFO(rclcpp::get_logger(),
       "    Type                 = %s",
       arv_camera_is_uv_device(p_camera_) ? "USB3Vision" :
           (arv_camera_is_gv_device(p_camera_) ? "GigEVision" : "Other"));
-  RCLCPP_INFO(rclcpp::get_logger(),("    Sensor width         = %d", sensors_[0]->width);
-  RCLCPP_INFO(rclcpp::get_logger(),("    Sensor height        = %d", sensors_[0]->height);
-  RCLCPP_INFO(rclcpp::get_logger(),("    ROI x,y,w,h          = %d, %d, %d, %d", roi_.x, roi_.y, roi_.width, roi_.height);
-  RCLCPP_INFO(rclcpp::get_logger(),("    Pixel format         = %s", sensors_[0]->pixel_format.c_str());
-  RCLCPP_INFO(rclcpp::get_logger(),("    BitsPerPixel         = %lu", sensors_[0]->n_bits_pixel);
-  RCLCPP_INFO(rclcpp::get_logger(),(
+  RCLCPP_INFO(rclcpp::get_logger(),"    Sensor width         = %d", sensors_[0]->width);
+  RCLCPP_INFO(rclcpp::get_logger(),"    Sensor height        = %d", sensors_[0]->height);
+  RCLCPP_INFO(rclcpp::get_logger(),"    ROI x,y,w,h          = %d, %d, %d, %d", roi_.x, roi_.y, roi_.width, roi_.height);
+  RCLCPP_INFO(rclcpp::get_logger(),"    Pixel format         = %s", sensors_[0]->pixel_format.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(),"    BitsPerPixel         = %lu", sensors_[0]->n_bits_pixel);
+  RCLCPP_INFO(rclcpp::get_logger(),
       "    Acquisition Mode     = %s",
       implemented_features_["AcquisitionMode"] ? arv_device_get_string_feature_value(p_device_, "AcquisitionMode") :
           "(not implemented in camera)");
-  RCLCPP_INFO(rclcpp::get_logger(),(
+  RCLCPP_INFO(rclcpp::get_logger(),
       "    Trigger Mode         = %s",
       implemented_features_["TriggerMode"] ? arv_device_get_string_feature_value(p_device_, "TriggerMode") :
           "(not implemented in camera)");
-  RCLCPP_INFO(rclcpp::get_logger(),(
+  RCLCPP_INFO(rclcpp::get_logger(),
       "    Trigger Source       = %s",
       implemented_features_["TriggerSource"] ? arv_device_get_string_feature_value(p_device_, "TriggerSource") :
           "(not implemented in camera)");
-  RCLCPP_INFO(rclcpp::get_logger(),("    Can set FrameRate:     %s", implemented_features_["AcquisitionFrameRate"] ? "True" : "False");
+  RCLCPP_INFO(rclcpp::get_logger(),"    Can set FrameRate:     %s", implemented_features_["AcquisitionFrameRate"] ? "True" : "False");
   if (implemented_features_["AcquisitionFrameRate"])
   {
-    RCLCPP_INFO(rclcpp::get_logger(),("    AcquisitionFrameRate = %g hz", config_.AcquisitionFrameRate);
+    RCLCPP_INFO(rclcpp::get_logger(),"    AcquisitionFrameRate = %g hz", config_.AcquisitionFrameRate);
   }
 
-  RCLCPP_INFO(rclcpp::get_logger(),("    Can set Exposure:      %s", implemented_features_["ExposureTime"] ? "True" : "False");
+  RCLCPP_INFO(rclcpp::get_logger(),"    Can set Exposure:      %s", implemented_features_["ExposureTime"] ? "True" : "False");
   if (implemented_features_["ExposureTime"])
   {
-    RCLCPP_INFO(rclcpp::get_logger(),("    Can set ExposureAuto:  %s", implemented_features_["ExposureAuto"] ? "True" : "False");
-    RCLCPP_INFO(rclcpp::get_logger(),("    Exposure             = %g us in range [%g,%g]", config_.ExposureTime, config_min_.ExposureTime,
+    RCLCPP_INFO(rclcpp::get_logger(),"    Can set ExposureAuto:  %s", implemented_features_["ExposureAuto"] ? "True" : "False");
+    RCLCPP_INFO(rclcpp::get_logger(),"    Exposure             = %g us in range [%g,%g]", config_.ExposureTime, config_min_.ExposureTime,
              config_max_.ExposureTime);
   }
 
-  RCLCPP_INFO(rclcpp::get_logger(),("    Can set Gain:          %s", implemented_features_["Gain"] ? "True" : "False");
+  RCLCPP_INFO(rclcpp::get_logger(),"    Can set Gain:          %s", implemented_features_["Gain"] ? "True" : "False");
   if (implemented_features_["Gain"])
   {
-    RCLCPP_INFO(rclcpp::get_logger(),("    Can set GainAuto:      %s", implemented_features_["GainAuto"] ? "True" : "False");
-    RCLCPP_INFO(rclcpp::get_logger(),("    Gain                 = %f %% in range [%f,%f]", config_.Gain, config_min_.Gain, config_max_.Gain);
+    RCLCPP_INFO(rclcpp::get_logger(),"    Can set GainAuto:      %s", implemented_features_["GainAuto"] ? "True" : "False");
+    RCLCPP_INFO(rclcpp::get_logger(),"    Gain                 = %f %% in range [%f,%f]", config_.Gain, config_min_.Gain, config_max_.Gain);
   }
 
-  RCLCPP_INFO(rclcpp::get_logger(),("    Can set FocusPos:      %s", implemented_features_["FocusPos"] ? "True" : "False");
+  RCLCPP_INFO(rclcpp::get_logger(),"    Can set FocusPos:      %s", implemented_features_["FocusPos"] ? "True" : "False");
 
   if (implemented_features_["GevSCPSPacketSize"])
-    RCLCPP_INFO(rclcpp::get_logger(),("    Network mtu          = %lu", arv_device_get_integer_feature_value(p_device_, "GevSCPSPacketSize"));
+    RCLCPP_INFO(rclcpp::get_logger(),"    Network mtu          = %lu", arv_device_get_integer_feature_value(p_device_, "GevSCPSPacketSize"));
 
-  RCLCPP_INFO(rclcpp::get_logger(),("    ---------------------------");
+  RCLCPP_INFO(rclcpp::get_logger(),"    ---------------------------");
 
   // Reset PTP clock
   if (use_ptp_stamp_)
@@ -942,98 +942,98 @@ void CameraAravisNodelet::spawnStream()
     arv_camera_start_acquisition(p_camera_);
   }
 
-  this->get_integer_service_ = pnh.advertiseService("get_integer_feature_value", &CameraAravisNodelet::getIntegerFeatureCallback, this);
-  this->get_float_service_ = pnh.advertiseService("get_float_feature_value", &CameraAravisNodelet::getFloatFeatureCallback, this);
-  this->get_string_service_ = pnh.advertiseService("get_string_feature_value", &CameraAravisNodelet::getStringFeatureCallback, this);
-  this->get_boolean_service_ = pnh.advertiseService("get_boolean_feature_value", &CameraAravisNodelet::getBooleanFeatureCallback, this);
+  // this->get_integer_service_ = pnh.advertiseService("get_integer_feature_value", &CameraAravisNodelet::getIntegerFeatureCallback, this);
+  // this->get_float_service_ = pnh.advertiseService("get_float_feature_value", &CameraAravisNodelet::getFloatFeatureCallback, this);
+  // this->get_string_service_ = pnh.advertiseService("get_string_feature_value", &CameraAravisNodelet::getStringFeatureCallback, this);
+  // this->get_boolean_service_ = pnh.advertiseService("get_boolean_feature_value", &CameraAravisNodelet::getBooleanFeatureCallback, this);
 
-  this->set_integer_service_ = pnh.advertiseService("set_integer_feature_value", &CameraAravisNodelet::setIntegerFeatureCallback, this);
-  this->set_float_service_ = pnh.advertiseService("set_float_feature_value", &CameraAravisNodelet::setFloatFeatureCallback, this);
-  this->set_string_service_ = pnh.advertiseService("set_string_feature_value", &CameraAravisNodelet::setStringFeatureCallback, this);
-  this->set_boolean_service_ = pnh.advertiseService("set_boolean_feature_value", &CameraAravisNodelet::setBooleanFeatureCallback, this);
+  // this->set_integer_service_ = pnh.advertiseService("set_integer_feature_value", &CameraAravisNodelet::setIntegerFeatureCallback, this);
+  // this->set_float_service_ = pnh.advertiseService("set_float_feature_value", &CameraAravisNodelet::setFloatFeatureCallback, this);
+  // this->set_string_service_ = pnh.advertiseService("set_string_feature_value", &CameraAravisNodelet::setStringFeatureCallback, this);
+  // this->set_boolean_service_ = pnh.advertiseService("set_boolean_feature_value", &CameraAravisNodelet::setBooleanFeatureCallback, this);
 
   RCLCPP_INFO(rclcpp::get_logger(),("Done initializing camera_aravis.");
 }
 
-bool CameraAravisNodelet::getIntegerFeatureCallback(camera_aravis::get_integer_feature_value::Request& request, camera_aravis::get_integer_feature_value::Response& response)
-{
-  const char* feature_name = request.feature.c_str();
-  response.response = arv_device_get_integer_feature_value(this->p_device_, feature_name);
-  return true;
-}
+// bool CameraAravisNodelet::getIntegerFeatureCallback(ros2_camera_aravis::srv::GetIntegerFeatureValue::Request& request, ros2_camera_aravis::srv::GetIntegerFeatureValue::Response& response)
+// {
+//   const char* feature_name = request.feature.c_str();
+//   response.response = arv_device_get_integer_feature_value(this->p_device_, feature_name);
+//   return true;
+// }
 
-bool CameraAravisNodelet::setIntegerFeatureCallback(camera_aravis::set_integer_feature_value::Request& request, camera_aravis::set_integer_feature_value::Response& response)
-{
-  const char* feature_name = request.feature.c_str();
-  guint64 value = request.value;
-  arv_device_set_integer_feature_value(this->p_device_, feature_name, value);
-  if(arv_device_get_status(this->p_device_) == ARV_DEVICE_STATUS_SUCCESS) {
-    response.ok = true;
-  } else {
-    response.ok = false;
-  }
-  return true;
-}
+// bool CameraAravisNodelet::setIntegerFeatureCallback(ros2_camera_aravis::srv::SetIntegerFeatureValue::Request& request, ros2_camera_aravis::srv::SetIntegerFeatureValue::Response& response)
+// {
+//   const char* feature_name = request.feature.c_str();
+//   guint64 value = request.value;
+//   arv_device_set_integer_feature_value(this->p_device_, feature_name, value);
+//   if(arv_device_get_status(this->p_device_) == ARV_DEVICE_STATUS_SUCCESS) {
+//     response.ok = true;
+//   } else {
+//     response.ok = false;
+//   }
+//   return true;
+// }
 
-bool CameraAravisNodelet::getFloatFeatureCallback(camera_aravis::get_float_feature_value::Request& request, camera_aravis::get_float_feature_value::Response& response)
-{
-  const char* feature_name = request.feature.c_str();
-  response.response = arv_device_get_float_feature_value(this->p_device_, feature_name);
-  return true;
-}
+// bool CameraAravisNodelet::getFloatFeatureCallback(ros2_camera_aravis::srv::GetFloatFeatureValue::Request& request, ros2_camera_aravis::srv::GetFloatFeatureValue::Response& response)
+// {
+//   const char* feature_name = request.feature.c_str();
+//   response.response = arv_device_get_float_feature_value(this->p_device_, feature_name);
+//   return true;
+// }
 
-bool CameraAravisNodelet::setFloatFeatureCallback(camera_aravis::set_float_feature_value::Request& request, camera_aravis::set_float_feature_value::Response& response)
-{
-  const char* feature_name = request.feature.c_str();
-  const double value = request.value;
-  arv_device_set_float_feature_value(this->p_device_, feature_name, value);
-  if(arv_device_get_status(this->p_device_) == ARV_DEVICE_STATUS_SUCCESS) {
-    response.ok = true;
-  } else {
-    response.ok = false;
-  }
-  return true;
-}
+// bool CameraAravisNodelet::setFloatFeatureCallback(ros2_camera_aravis::srv::SetFloatFeatureValue::Request& request, ros2_camera_aravis::srv::SetFloatFeatureValue::Response& response)
+// {
+//   const char* feature_name = request.feature.c_str();
+//   const double value = request.value;
+//   arv_device_set_float_feature_value(this->p_device_, feature_name, value);
+//   if(arv_device_get_status(this->p_device_) == ARV_DEVICE_STATUS_SUCCESS) {
+//     response.ok = true;
+//   } else {
+//     response.ok = false;
+//   }
+//   return true;
+// }
 
-bool CameraAravisNodelet::getStringFeatureCallback(camera_aravis::get_string_feature_value::Request& request, camera_aravis::get_string_feature_value::Response& response)
-{
-  const char* feature_name = request.feature.c_str();
-  response.response = arv_device_get_string_feature_value(this->p_device_, feature_name);
-  return true;
-}
+// bool CameraAravisNodelet::getStringFeatureCallback(ros2_camera_aravis::srv::GetStringFeatureValue::Request& request, ros2_camera_aravis::srv::GetStringFeatureValue::Response& response)
+// {
+//   const char* feature_name = request.feature.c_str();
+//   response.response = arv_device_get_string_feature_value(this->p_device_, feature_name);
+//   return true;
+// }
 
-bool CameraAravisNodelet::setStringFeatureCallback(camera_aravis::set_string_feature_value::Request& request, camera_aravis::set_string_feature_value::Response& response)
-{
-  const char* feature_name = request.feature.c_str();
-  const char* value = request.value.c_str();
-  arv_device_set_string_feature_value(this->p_device_, feature_name, value);
-  if(arv_device_get_status(this->p_device_) == ARV_DEVICE_STATUS_SUCCESS) {
-    response.ok = true;
-  } else {
-    response.ok = false;
-  }
-  return true;
-}
+// bool CameraAravisNodelet::setStringFeatureCallback(ros2_camera_aravis::srv::SetStringFeatureValue::Request& request, ros2_camera_aravis::srv::SetStringFeatureValue::Response& response)
+// {
+//   const char* feature_name = request.feature.c_str();
+//   const char* value = request.value.c_str();
+//   arv_device_set_string_feature_value(this->p_device_, feature_name, value);
+//   if(arv_device_get_status(this->p_device_) == ARV_DEVICE_STATUS_SUCCESS) {
+//     response.ok = true;
+//   } else {
+//     response.ok = false;
+//   }
+//   return true;
+// }
 
-bool CameraAravisNodelet::getBooleanFeatureCallback(camera_aravis::get_boolean_feature_value::Request& request, camera_aravis::get_boolean_feature_value::Response& response)
-{
-  const char* feature_name = request.feature.c_str();
-  response.response = arv_device_get_boolean_feature_value(this->p_device_, feature_name);
-  return true;
-}
+// bool CameraAravisNodelet::getBooleanFeatureCallback(ros2_camera_aravis::srv::GetBooleanFeatureValue::Request& request, ros2_camera_aravis::srv::GetBooleanFeatureValue::Response& response)
+// {
+//   const char* feature_name = request.feature.c_str();
+//   response.response = arv_device_get_boolean_feature_value(this->p_device_, feature_name);
+//   return true;
+// }
 
-bool CameraAravisNodelet::setBooleanFeatureCallback(camera_aravis::set_boolean_feature_value::Request& request, camera_aravis::set_boolean_feature_value::Response& response)
-{
-  const char* feature_name = request.feature.c_str();
-  const bool value = request.value;
-  arv_device_set_boolean_feature_value(this->p_device_, feature_name, value);
-  if(arv_device_get_status(this->p_device_) == ARV_DEVICE_STATUS_SUCCESS) {
-    response.ok = true;
-  } else {
-    response.ok = false;
-  }
-  return true;
-}
+// bool CameraAravisNodelet::setBooleanFeatureCallback(ros2_camera_aravis::srv::SetBooleanFeatureValue::Request& request, ros2_camera_aravis::srv::SetBooleanFeatureValue::Response& response)
+// {
+//   const char* feature_name = request.feature.c_str();
+//   const bool value = request.value;
+//   arv_device_set_boolean_feature_value(this->p_device_, feature_name, value);
+//   if(arv_device_get_status(this->p_device_) == ARV_DEVICE_STATUS_SUCCESS) {
+//     response.ok = true;
+//   } else {
+//     response.ok = false;
+//   }
+//   return true;
+// }
 
 void CameraAravisNodelet::resetPtpClock()
 {
@@ -1320,242 +1320,242 @@ void CameraAravisNodelet::tuneGvStream(ArvGvStream *p_stream)
   }
 }
 
-void CameraAravisNodelet::rosReconfigureCallback(Config &config, uint32_t level)
-{
-  reconfigure_mutex_.lock();
-  std::string tf_prefix = tf::getPrefixParam(getNodeHandle());
-  RCLCPP_DEBUG_STREAM(rclcpp::get_logger(), "tf_prefix: " << tf_prefix);
+// void CameraAravisNodelet::rosReconfigureCallback(Config &config, uint32_t level)
+// {
+//   reconfigure_mutex_.lock();
+//   std::string tf_prefix = tf::getPrefixParam(getNodeHandle());
+//   RCLCPP_DEBUG_STREAM(rclcpp::get_logger(), "tf_prefix: " << tf_prefix);
 
-  if (config.frame_id == "")
-    config.frame_id = this->getName();
+//   if (config.frame_id == "")
+//     config.frame_id = this->getName();
 
-  // Limit params to legal values.
-  config.AcquisitionFrameRate = CLAMP(config.AcquisitionFrameRate, config_min_.AcquisitionFrameRate,
-                                      config_max_.AcquisitionFrameRate);
-  config.ExposureTime = CLAMP(config.ExposureTime, config_min_.ExposureTime, config_max_.ExposureTime);
-  config.Gain = CLAMP(config.Gain, config_min_.Gain, config_max_.Gain);
-  config.FocusPos = CLAMP(config.FocusPos, config_min_.FocusPos, config_max_.FocusPos);
-  config.frame_id = tf::resolve(tf_prefix, config.frame_id);
+//   // Limit params to legal values.
+//   config.AcquisitionFrameRate = CLAMP(config.AcquisitionFrameRate, config_min_.AcquisitionFrameRate,
+//                                       config_max_.AcquisitionFrameRate);
+//   config.ExposureTime = CLAMP(config.ExposureTime, config_min_.ExposureTime, config_max_.ExposureTime);
+//   config.Gain = CLAMP(config.Gain, config_min_.Gain, config_max_.Gain);
+//   config.FocusPos = CLAMP(config.FocusPos, config_min_.FocusPos, config_max_.FocusPos);
+//   config.frame_id = tf::resolve(tf_prefix, config.frame_id);
 
-  if (use_ptp_stamp_)
-    resetPtpClock();
+//   if (use_ptp_stamp_)
+//     resetPtpClock();
 
-  // stop auto functions if slave
-  if (config.AutoSlave)
-  {
-    config.ExposureAuto = "Off";
-    config.GainAuto = "Off";
-    // todo: all other auto functions "Off"
-  }
+//   // stop auto functions if slave
+//   if (config.AutoSlave)
+//   {
+//     config.ExposureAuto = "Off";
+//     config.GainAuto = "Off";
+//     // todo: all other auto functions "Off"
+//   }
 
-  // reset values controlled by auto functions
-  if (config.ExposureAuto.compare("Off") != 0)
-  {
-    config.ExposureTime = config_.ExposureTime;
-    RCLCPP_WARN(rclcpp::get_logger(),"ExposureAuto is active. Cannot manually set ExposureTime.");
-  }
-  if (config.GainAuto.compare("Off") != 0)
-  {
-    config.Gain = config_.Gain;
-    RCLCPP_WARN(rclcpp::get_logger(),"GainAuto is active. Cannot manually set Gain.");
-  }
+//   // reset values controlled by auto functions
+//   if (config.ExposureAuto.compare("Off") != 0)
+//   {
+//     config.ExposureTime = config_.ExposureTime;
+//     RCLCPP_WARN(rclcpp::get_logger(),"ExposureAuto is active. Cannot manually set ExposureTime.");
+//   }
+//   if (config.GainAuto.compare("Off") != 0)
+//   {
+//     config.Gain = config_.Gain;
+//     RCLCPP_WARN(rclcpp::get_logger(),"GainAuto is active. Cannot manually set Gain.");
+//   }
 
-  // reset FrameRate when triggered
-  if (config.TriggerMode.compare("Off") != 0)
-  {
-    config.AcquisitionFrameRate = config_.AcquisitionFrameRate;
-    RCLCPP_WARN(rclcpp::get_logger(),"TriggerMode is active. Cannot manually set AcquisitionFrameRate.");
-  }
+//   // reset FrameRate when triggered
+//   if (config.TriggerMode.compare("Off") != 0)
+//   {
+//     config.AcquisitionFrameRate = config_.AcquisitionFrameRate;
+//     RCLCPP_WARN(rclcpp::get_logger(),"TriggerMode is active. Cannot manually set AcquisitionFrameRate.");
+//   }
 
-  // Find valid user changes we need to react to.
-  const bool changed_auto_master = (config_.AutoMaster != config.AutoMaster);
-  const bool changed_auto_slave = (config_.AutoSlave != config.AutoSlave);
-  const bool changed_acquisition_frame_rate = (config_.AcquisitionFrameRate != config.AcquisitionFrameRate);
-  const bool changed_exposure_auto = (config_.ExposureAuto != config.ExposureAuto);
-  const bool changed_exposure_time = (config_.ExposureTime != config.ExposureTime);
-  const bool changed_gain_auto = (config_.GainAuto != config.GainAuto);
-  const bool changed_gain = (config_.Gain != config.Gain);
-  const bool changed_acquisition_mode = (config_.AcquisitionMode != config.AcquisitionMode);
-  const bool changed_trigger_mode = (config_.TriggerMode != config.TriggerMode);
-  const bool changed_trigger_source = (config_.TriggerSource != config.TriggerSource) || changed_trigger_mode;
-  const bool changed_focus_pos = (config_.FocusPos != config.FocusPos);
-  const bool changed_mtu = (config_.mtu != config.mtu);
+//   // Find valid user changes we need to react to.
+//   const bool changed_auto_master = (config_.AutoMaster != config.AutoMaster);
+//   const bool changed_auto_slave = (config_.AutoSlave != config.AutoSlave);
+//   const bool changed_acquisition_frame_rate = (config_.AcquisitionFrameRate != config.AcquisitionFrameRate);
+//   const bool changed_exposure_auto = (config_.ExposureAuto != config.ExposureAuto);
+//   const bool changed_exposure_time = (config_.ExposureTime != config.ExposureTime);
+//   const bool changed_gain_auto = (config_.GainAuto != config.GainAuto);
+//   const bool changed_gain = (config_.Gain != config.Gain);
+//   const bool changed_acquisition_mode = (config_.AcquisitionMode != config.AcquisitionMode);
+//   const bool changed_trigger_mode = (config_.TriggerMode != config.TriggerMode);
+//   const bool changed_trigger_source = (config_.TriggerSource != config.TriggerSource) || changed_trigger_mode;
+//   const bool changed_focus_pos = (config_.FocusPos != config.FocusPos);
+//   const bool changed_mtu = (config_.mtu != config.mtu);
 
-  if (changed_auto_master)
-  {
-    setAutoMaster(config.AutoMaster);
-  }
+//   if (changed_auto_master)
+//   {
+//     setAutoMaster(config.AutoMaster);
+//   }
 
-  if (changed_auto_slave)
-  {
-    setAutoSlave(config.AutoSlave);
-  }
+//   if (changed_auto_slave)
+//   {
+//     setAutoSlave(config.AutoSlave);
+//   }
 
-  // Set params into the camera.
-  if (changed_exposure_time)
-  {
-    if (implemented_features_["ExposureTime"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set ExposureTime = %f us", config.ExposureTime);
-      arv_camera_set_exposure_time(p_camera_, config.ExposureTime);
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support ExposureTime.");
-  }
+//   // Set params into the camera.
+//   if (changed_exposure_time)
+//   {
+//     if (implemented_features_["ExposureTime"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set ExposureTime = %f us", config.ExposureTime);
+//       arv_camera_set_exposure_time(p_camera_, config.ExposureTime);
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support ExposureTime.");
+//   }
 
-  if (changed_gain)
-  {
-    if (implemented_features_["Gain"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set gain = %f", config.Gain);
-      arv_camera_set_gain(p_camera_, config.Gain);
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support Gain or GainRaw.");
-  }
+//   if (changed_gain)
+//   {
+//     if (implemented_features_["Gain"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set gain = %f", config.Gain);
+//       arv_camera_set_gain(p_camera_, config.Gain);
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support Gain or GainRaw.");
+//   }
 
-  if (changed_exposure_auto)
-  {
-    if (implemented_features_["ExposureAuto"] && implemented_features_["ExposureTime"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set ExposureAuto = %s", config.ExposureAuto.c_str());
-      arv_device_set_string_feature_value(p_device_, "ExposureAuto", config.ExposureAuto.c_str());
-      if (config.ExposureAuto.compare("Once") == 0)
-      {
-        ros::Duration(2.0).sleep();
-        config.ExposureTime = arv_camera_get_exposure_time(p_camera_);
-        RCLCPP_INFO(rclcpp::get_logger(),("Get ExposureTime = %f us", config.ExposureTime);
-        config.ExposureAuto = "Off";
-      }
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support ExposureAuto.");
-  }
-  if (changed_gain_auto)
-  {
-    if (implemented_features_["GainAuto"] && implemented_features_["Gain"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set GainAuto = %s", config.GainAuto.c_str());
-      arv_device_set_string_feature_value(p_device_, "GainAuto", config.GainAuto.c_str());
-      if (config.GainAuto.compare("Once") == 0)
-      {
-        ros::Duration(2.0).sleep();
-        config.Gain = arv_camera_get_gain(p_camera_);
-        RCLCPP_INFO(rclcpp::get_logger(),("Get Gain = %f", config.Gain);
-        config.GainAuto = "Off";
-      }
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support GainAuto.");
-  }
+//   if (changed_exposure_auto)
+//   {
+//     if (implemented_features_["ExposureAuto"] && implemented_features_["ExposureTime"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set ExposureAuto = %s", config.ExposureAuto.c_str());
+//       arv_device_set_string_feature_value(p_device_, "ExposureAuto", config.ExposureAuto.c_str());
+//       if (config.ExposureAuto.compare("Once") == 0)
+//       {
+//         ros::Duration(2.0).sleep();
+//         config.ExposureTime = arv_camera_get_exposure_time(p_camera_);
+//         RCLCPP_INFO(rclcpp::get_logger(),("Get ExposureTime = %f us", config.ExposureTime);
+//         config.ExposureAuto = "Off";
+//       }
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support ExposureAuto.");
+//   }
+//   if (changed_gain_auto)
+//   {
+//     if (implemented_features_["GainAuto"] && implemented_features_["Gain"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set GainAuto = %s", config.GainAuto.c_str());
+//       arv_device_set_string_feature_value(p_device_, "GainAuto", config.GainAuto.c_str());
+//       if (config.GainAuto.compare("Once") == 0)
+//       {
+//         ros::Duration(2.0).sleep();
+//         config.Gain = arv_camera_get_gain(p_camera_);
+//         RCLCPP_INFO(rclcpp::get_logger(),("Get Gain = %f", config.Gain);
+//         config.GainAuto = "Off";
+//       }
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support GainAuto.");
+//   }
 
-  if (changed_acquisition_frame_rate)
-  {
-    if (implemented_features_["AcquisitionFrameRate"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set frame rate = %f Hz", config.AcquisitionFrameRate);
-      arv_camera_set_frame_rate(p_camera_, config.AcquisitionFrameRate);
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support AcquisitionFrameRate.");
-  }
+//   if (changed_acquisition_frame_rate)
+//   {
+//     if (implemented_features_["AcquisitionFrameRate"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set frame rate = %f Hz", config.AcquisitionFrameRate);
+//       arv_camera_set_frame_rate(p_camera_, config.AcquisitionFrameRate);
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support AcquisitionFrameRate.");
+//   }
 
-  if (changed_trigger_mode)
-  {
-    if (implemented_features_["TriggerMode"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set TriggerMode = %s", config.TriggerMode.c_str());
-      arv_device_set_string_feature_value(p_device_, "TriggerMode", config.TriggerMode.c_str());
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerMode.");
-  }
+//   if (changed_trigger_mode)
+//   {
+//     if (implemented_features_["TriggerMode"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set TriggerMode = %s", config.TriggerMode.c_str());
+//       arv_device_set_string_feature_value(p_device_, "TriggerMode", config.TriggerMode.c_str());
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerMode.");
+//   }
 
-  if (changed_trigger_source)
-  {
-    // delete old software trigger thread if active
-    software_trigger_active_ = false;
-    if (software_trigger_thread_.joinable())
-    {
-      software_trigger_thread_.join();
-    }
+//   if (changed_trigger_source)
+//   {
+//     // delete old software trigger thread if active
+//     software_trigger_active_ = false;
+//     if (software_trigger_thread_.joinable())
+//     {
+//       software_trigger_thread_.join();
+//     }
 
-    if (implemented_features_["TriggerSource"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set TriggerSource = %s", config.TriggerSource.c_str());
-      arv_device_set_string_feature_value(p_device_, "TriggerSource", config.TriggerSource.c_str());
-    }
-    else
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerSource.");
-    }
+//     if (implemented_features_["TriggerSource"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set TriggerSource = %s", config.TriggerSource.c_str());
+//       arv_device_set_string_feature_value(p_device_, "TriggerSource", config.TriggerSource.c_str());
+//     }
+//     else
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerSource.");
+//     }
 
-    // activate on demand
-    if (config.TriggerMode.compare("On") == 0 && config.TriggerSource.compare("Software") == 0)
-    {
-      if (implemented_features_["TriggerSoftware"])
-      {
-        config_.softwaretriggerrate = config.softwaretriggerrate;
-        RCLCPP_INFO(rclcpp::get_logger(),("Set softwaretriggerrate = %f", 1000.0 / ceil(1000.0 / config.softwaretriggerrate));
+//     // activate on demand
+//     if (config.TriggerMode.compare("On") == 0 && config.TriggerSource.compare("Software") == 0)
+//     {
+//       if (implemented_features_["TriggerSoftware"])
+//       {
+//         config_.softwaretriggerrate = config.softwaretriggerrate;
+//         RCLCPP_INFO(rclcpp::get_logger(),("Set softwaretriggerrate = %f", 1000.0 / ceil(1000.0 / config.softwaretriggerrate));
 
-        // Turn on software timer callback.
-        software_trigger_thread_ = std::thread(&CameraAravisNodelet::softwareTriggerLoop, this);
-      }
-      else
-      {
-        RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerSoftware command.");
-      }
-    }
-  }
+//         // Turn on software timer callback.
+//         software_trigger_thread_ = std::thread(&CameraAravisNodelet::softwareTriggerLoop, this);
+//       }
+//       else
+//       {
+//         RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerSoftware command.");
+//       }
+//     }
+//   }
 
-  if (changed_focus_pos)
-  {
-    if (implemented_features_["FocusPos"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set FocusPos = %d", config.FocusPos);
-      arv_device_set_integer_feature_value(p_device_, "FocusPos", config.FocusPos);
-      ros::Duration(1.0).sleep();
-      config.FocusPos = arv_device_get_integer_feature_value(p_device_, "FocusPos");
-      RCLCPP_INFO(rclcpp::get_logger(),("Get FocusPos = %d", config.FocusPos);
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support FocusPos.");
-  }
+//   if (changed_focus_pos)
+//   {
+//     if (implemented_features_["FocusPos"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set FocusPos = %d", config.FocusPos);
+//       arv_device_set_integer_feature_value(p_device_, "FocusPos", config.FocusPos);
+//       ros::Duration(1.0).sleep();
+//       config.FocusPos = arv_device_get_integer_feature_value(p_device_, "FocusPos");
+//       RCLCPP_INFO(rclcpp::get_logger(),("Get FocusPos = %d", config.FocusPos);
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support FocusPos.");
+//   }
 
-  if (changed_mtu)
-  {
-    if (implemented_features_["GevSCPSPacketSize"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set mtu = %d", config.mtu);
-      arv_device_set_integer_feature_value(p_device_, "GevSCPSPacketSize", config.mtu);
-      ros::Duration(1.0).sleep();
-      config.mtu = arv_device_get_integer_feature_value(p_device_, "GevSCPSPacketSize");
-      RCLCPP_INFO(rclcpp::get_logger(),("Get mtu = %d", config.mtu);
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support mtu (i.e. GevSCPSPacketSize).");
-  }
+//   if (changed_mtu)
+//   {
+//     if (implemented_features_["GevSCPSPacketSize"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set mtu = %d", config.mtu);
+//       arv_device_set_integer_feature_value(p_device_, "GevSCPSPacketSize", config.mtu);
+//       ros::Duration(1.0).sleep();
+//       config.mtu = arv_device_get_integer_feature_value(p_device_, "GevSCPSPacketSize");
+//       RCLCPP_INFO(rclcpp::get_logger(),("Get mtu = %d", config.mtu);
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support mtu (i.e. GevSCPSPacketSize).");
+//   }
 
-  if (changed_acquisition_mode)
-  {
-    if (implemented_features_["AcquisitionMode"])
-    {
-      RCLCPP_INFO(rclcpp::get_logger(),("Set AcquisitionMode = %s", config.AcquisitionMode.c_str());
-      arv_device_set_string_feature_value(p_device_, "AcquisitionMode", config.AcquisitionMode.c_str());
+//   if (changed_acquisition_mode)
+//   {
+//     if (implemented_features_["AcquisitionMode"])
+//     {
+//       RCLCPP_INFO(rclcpp::get_logger(),("Set AcquisitionMode = %s", config.AcquisitionMode.c_str());
+//       arv_device_set_string_feature_value(p_device_, "AcquisitionMode", config.AcquisitionMode.c_str());
 
-      RCLCPP_INFO(rclcpp::get_logger(),("AcquisitionStop");
-      arv_device_execute_command(p_device_, "AcquisitionStop");
-      RCLCPP_INFO(rclcpp::get_logger(),("AcquisitionStart");
-      arv_device_execute_command(p_device_, "AcquisitionStart");
-    }
-    else
-      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support AcquisitionMode.");
-  }
+//       RCLCPP_INFO(rclcpp::get_logger(),("AcquisitionStop");
+//       arv_device_execute_command(p_device_, "AcquisitionStop");
+//       RCLCPP_INFO(rclcpp::get_logger(),("AcquisitionStart");
+//       arv_device_execute_command(p_device_, "AcquisitionStart");
+//     }
+//     else
+//       RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support AcquisitionMode.");
+//   }
 
-  // adopt new config
-  config_ = config;
-  reconfigure_mutex_.unlock();
-}
+//   // adopt new config
+//   config_ = config;
+//   reconfigure_mutex_.unlock();
+// }
 
 void CameraAravisNodelet::rosConnectCallback()
 {
