@@ -28,12 +28,15 @@
 #include <arv.h>
 
 #include <rclcpp/rclcpp.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/bind.hpp>
-#include <boost/bind/placeholders.hpp>
+#include <memory>
 
-#include <sensor_msgs/msg/image.h>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/image_encodings.hpp>
+#include <sstream>
+#include <type_traits>
+#include "rclcpp/logger.hpp"
+#include "rcutils/logging_macros.h"
+#include "rclcpp/utilities.hpp"
 
 #include <mutex>
 #include <map>
@@ -42,11 +45,11 @@
 namespace camera_aravis
 {
 
-class CameraBufferPool : public boost::enable_shared_from_this<CameraBufferPool>
+class CameraBufferPool : public std::enable_shared_from_this<CameraBufferPool>
 {
 public:
-  typedef boost::shared_ptr<CameraBufferPool> Ptr;
-  typedef boost::weak_ptr<CameraBufferPool> WPtr;
+  typedef std::shared_ptr<CameraBufferPool> Ptr;
+  typedef std::weak_ptr<CameraBufferPool> WPtr;
 
   // Note: If the CameraBufferPool is destroyed, buffers will be deallocated. Therefor, make sure
   // that the CameraBufferPool stays alive longer than the given stream object.
@@ -58,14 +61,14 @@ public:
   virtual ~CameraBufferPool();
 
   // Get an image whose lifespan is administrated by this pool (but not registered to the camera).
-  sensor_msgs::ImagePtr getRecyclableImg();
+  std::shared_ptr<sensor_msgs::msg::Image> getRecyclableImg();
 
   // Get the image message which wraps around the given ArvBuffer.
   //
   // If this buffer is not administrated by this CameraBufferPool,
   // a new image message is allocated and the contents of the buffer
   // are copied to it.
-  sensor_msgs::ImagePtr operator[](ArvBuffer *buffer);
+  std::shared_ptr<sensor_msgs::msg::Image> operator[](ArvBuffer *buffer);
 
   inline size_t getAllocatedSize() const
   {
@@ -92,19 +95,19 @@ protected:
   // Custom deleter for aravis buffer wrapping image messages, which
   // either pushes the buffer back to the aravis stream cleans it up
   // when the CameraBufferPool is gone.
-  static void reclaim(const WPtr &self, sensor_msgs::Image *p_img);
+  static void reclaim(const WPtr &self, std::shared_ptr<sensor_msgs::msg::Image> p_img);
 
   // Push the buffer inside the given image back to the aravis stream,
   // remember the corresponding image message.
-  void push(sensor_msgs::Image *p_img);
+  void push(std::shared_ptr<sensor_msgs::msg::Image> p_img);
 
   ArvStream *stream_ = NULL;
   size_t payload_size_bytes_ = 0;
   size_t n_buffers_ = 0;
 
-  std::map<const uint8_t*, sensor_msgs::ImagePtr> available_img_buffers_;
-  std::map<sensor_msgs::Image*, ArvBuffer*> used_buffers_;
-  std::stack<sensor_msgs::ImagePtr> dangling_imgs_;
+  std::map<const uint8_t*, std::shared_ptr<sensor_msgs::msg::Image>> available_img_buffers_;
+  std::map<std::shared_ptr<sensor_msgs::msg::Image>, ArvBuffer*> used_buffers_;
+  std::stack<std::shared_ptr<sensor_msgs::msg::Image>> dangling_imgs_;
   mutable std::mutex mutex_;
   Ptr self_;
 };

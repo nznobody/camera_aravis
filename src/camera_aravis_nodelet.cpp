@@ -27,12 +27,31 @@
 // #include <pluginlib/class_list_macros.h>
 // PLUGINLIB_EXPORT_CLASS(camera_aravis::CameraAravisNodelet, nodelet::Nodelet)
 
+const std::string WHITESPACE = " \n\r\t\f\v";
+ 
+std::string ltrim(const std::string &s)
+{
+    size_t start = s.find_first_not_of(WHITESPACE);
+    return (start == std::string::npos) ? "" : s.substr(start);
+}
+ 
+std::string rtrim(const std::string &s)
+{
+    size_t end = s.find_last_not_of(WHITESPACE);
+    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+}
+ 
+std::string trim(const std::string &s) {
+    return rtrim(ltrim(s));
+}
+
+
 namespace camera_aravis
 {
 
-void renameImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format) {
+void renameImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format) {
   if (!in) {
-    ROS_WARN("camera_aravis::renameImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::renameImg(): no input image given.");
     return;
   }
 
@@ -48,10 +67,10 @@ void shift(uint16_t* data, const size_t length, const size_t digits) {
   }
 }
 
-void shiftImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const size_t n_digits, const std::string out_format)
+void shiftImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const size_t n_digits, const std::string out_format)
 {
   if (!in) {
-    ROS_WARN("camera_aravis::shiftImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::shiftImg(): no input image given.");
     return;
   }
 
@@ -63,16 +82,16 @@ void shiftImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const size_
   out->encoding = out_format;
 }
 
-void interleaveImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const size_t n_digits, const std::string out_format)
+void interleaveImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const size_t n_digits, const std::string out_format)
 {
   if (!in) {
-    ROS_WARN("camera_aravis::interleaveImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::interleaveImg(): no input image given.");
     return;
   }
 
   if (!out) {
-    out.reset(new sensor_msgs::Image);
-    ROS_INFO("camera_aravis::interleaveImg(): no output image given. Reserved a new one.");
+    out.reset(std::make_shared<sensor_msgs::msg::Image>());
+    RCLCPP_INFO(rclcpp::get_logger(),"camera_aravis::interleaveImg(): no output image given. Reserved a new one.");
   }
 
   out->header = in->header;
@@ -108,15 +127,15 @@ void interleaveImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const 
   out->encoding = out_format;
 }
 
-void unpack10p32Img(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format) {
+void unpack10p32Img(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format) {
   if (!in) {
-    ROS_WARN("camera_aravis::unpack10pImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::unpack10pImg(): no input image given.");
     return;
   }
 
   if (!out) {
     out.reset(new sensor_msgs::Image);
-    ROS_INFO("camera_aravis::unpack10pImg(): no output image given. Reserved a new one.");
+    RCLCPP_INFO(rclcpp::get_logger(),("camera_aravis::unpack10pImg(): no output image given. Reserved a new one.");
   }
 
   out->header = in->header;
@@ -156,15 +175,15 @@ void unpack10p32Img(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const
   out->encoding = out_format;
 }
 
-void unpack10PackedImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format) {
+void unpack10PackedImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format) {
   if (!in) {
-    ROS_WARN("camera_aravis::unpack10pImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::unpack10pImg(): no input image given.");
     return;
   }
 
   if (!out) {
     out.reset(new sensor_msgs::Image);
-    ROS_INFO("camera_aravis::unpack10pImg(): no output image given. Reserved a new one.");
+    RCLCPP_INFO(rclcpp::get_logger(),("camera_aravis::unpack10pImg(): no output image given. Reserved a new one.");
   }
 
   out->header = in->header;
@@ -202,15 +221,15 @@ void unpack10PackedImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, co
 }
 
 
-void unpack10pMonoImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format) {
+void unpack10pMonoImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format) {
   if (!in) {
-    ROS_WARN("camera_aravis::unpack10pImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::unpack10pImg(): no input image given.");
     return;
   }
 
   if (!out) {
     out.reset(new sensor_msgs::Image);
-    ROS_INFO("camera_aravis::unpack10pImg(): no output image given. Reserved a new one.");
+    RCLCPP_INFO(rclcpp::get_logger(),("camera_aravis::unpack10pImg(): no output image given. Reserved a new one.");
   }
 
   out->header = in->header;
@@ -252,15 +271,15 @@ void unpack10pMonoImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, con
   out->encoding = out_format;
 }
 
-void unpack10PackedMonoImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format) {
+void unpack10PackedMonoImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format) {
   if (!in) {
-    ROS_WARN("camera_aravis::unpack10pImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::unpack10pImg(): no input image given.");
     return;
   }
 
   if (!out) {
     out.reset(new sensor_msgs::Image);
-    ROS_INFO("camera_aravis::unpack10pImg(): no output image given. Reserved a new one.");
+    RCLCPP_INFO(rclcpp::get_logger(),("camera_aravis::unpack10pImg(): no output image given. Reserved a new one.");
   }
 
   out->header = in->header;
@@ -296,15 +315,15 @@ void unpack10PackedMonoImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out
   out->encoding = out_format;
 }
 
-void unpack12pImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format) {
+void unpack12pImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format) {
   if (!in) {
-    ROS_WARN("camera_aravis::unpack12pImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::unpack12pImg(): no input image given.");
     return;
   }
 
   if (!out) {
     out.reset(new sensor_msgs::Image);
-    ROS_INFO("camera_aravis::unpack12pImg(): no output image given. Reserved a new one.");
+    RCLCPP_INFO(rclcpp::get_logger(),("camera_aravis::unpack12pImg(): no output image given. Reserved a new one.");
   }
 
   out->header = in->header;
@@ -338,15 +357,15 @@ void unpack12pImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const s
   out->encoding = out_format;
 }
 
-void unpack12PackedImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format) {
+void unpack12PackedImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format) {
   if (!in) {
-    ROS_WARN("camera_aravis::unpack12pImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::unpack12pImg(): no input image given.");
     return;
   }
 
   if (!out) {
     out.reset(new sensor_msgs::Image);
-    ROS_INFO("camera_aravis::unpack12pImg(): no output image given. Reserved a new one.");
+    RCLCPP_INFO(rclcpp::get_logger(),("camera_aravis::unpack12pImg(): no output image given. Reserved a new one.");
   }
 
   out->header = in->header;
@@ -382,15 +401,15 @@ void unpack12PackedImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, co
   out->encoding = out_format;
 }
 
-void unpack565pImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format) {
+void unpack565pImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format) {
   if (!in) {
-    ROS_WARN("camera_aravis::unpack565pImg(): no input image given.");
+    RCLCPP_WARN(rclcpp::get_logger(),"camera_aravis::unpack565pImg(): no input image given.");
     return;
   }
 
   if (!out) {
     out.reset(new sensor_msgs::Image);
-    ROS_INFO("camera_aravis::unpack565pImg(): no output image given. Reserved a new one.");
+    RCLCPP_INFO(rclcpp::get_logger(),("camera_aravis::unpack565pImg(): no output image given. Reserved a new one.");
   }
 
   out->header = in->header;
@@ -461,16 +480,16 @@ CameraAravisNodelet::~CameraAravisNodelet()
     guint64 n_failures = 0;
     guint64 n_underruns = 0;
     arv_stream_get_statistics(p_streams_[i], &n_completed_buffers, &n_failures, &n_underruns);
-    ROS_INFO("Completed buffers = %Lu", (unsigned long long ) n_completed_buffers);
-    ROS_INFO("Failures          = %Lu", (unsigned long long ) n_failures);
-    ROS_INFO("Underruns         = %Lu", (unsigned long long ) n_underruns);
+    RCLCPP_INFO(rclcpp::get_logger(),("Completed buffers = %Lu", (unsigned long long ) n_completed_buffers);
+    RCLCPP_INFO(rclcpp::get_logger(),("Failures          = %Lu", (unsigned long long ) n_failures);
+    RCLCPP_INFO(rclcpp::get_logger(),("Underruns         = %Lu", (unsigned long long ) n_underruns);
     if (arv_camera_is_gv_device(p_camera_))
     {
     guint64 n_resent;
     guint64 n_missing;
     arv_gv_stream_get_statistics(reinterpret_cast<ArvGvStream*>(p_streams_[i]), &n_resent, &n_missing);
-    ROS_INFO("Resent buffers    = %Lu", (unsigned long long ) n_resent);
-    ROS_INFO("Missing           = %Lu", (unsigned long long ) n_missing);
+    RCLCPP_INFO(rclcpp::get_logger(),("Resent buffers    = %Lu", (unsigned long long ) n_resent);
+    RCLCPP_INFO(rclcpp::get_logger(),("Missing           = %Lu", (unsigned long long ) n_missing);
     }
   }
 
@@ -491,19 +510,19 @@ void CameraAravisNodelet::onInit()
   ros::NodeHandle pnh = getPrivateNodeHandle();
 
   // Print out some useful info.
-  ROS_INFO("Attached cameras:");
+  RCLCPP_INFO(rclcpp::get_logger(),("Attached cameras:");
   arv_update_device_list();
   uint n_interfaces = arv_get_n_interfaces();
-  ROS_INFO("# Interfaces: %d", n_interfaces);
+  RCLCPP_INFO(rclcpp::get_logger(),("# Interfaces: %d", n_interfaces);
 
   uint n_devices = arv_get_n_devices();
-  ROS_INFO("# Devices: %d", n_devices);
+  RCLCPP_INFO(rclcpp::get_logger(),("# Devices: %d", n_devices);
   for (uint i = 0; i < n_devices; i++)
-    ROS_INFO("Device%d: %s", i, arv_get_device_id(i));
+    RCLCPP_INFO(rclcpp::get_logger(),("Device%d: %s", i, arv_get_device_id(i));
 
   if (n_devices == 0)
   {
-    ROS_ERROR("No cameras detected.");
+    RCLCPP_ERROR(rclcpp::get_logger(),"No cameras detected.");
     return;
   }
 
@@ -522,12 +541,12 @@ void CameraAravisNodelet::onInit()
   {
     if (guid.empty())
     {
-      ROS_INFO("Opening: (any)");
+      RCLCPP_INFO(rclcpp::get_logger(),("Opening: (any)");
       p_camera_ = arv_camera_new(NULL);
     }
     else
     {
-      ROS_INFO_STREAM("Opening: " << guid);
+      RCLCPP_INFO(rclcpp::get_logger(),_STREAM("Opening: " << guid);
       p_camera_ = arv_camera_new(guid.c_str());
     }
     ros::Duration(1.0).sleep();
@@ -535,14 +554,14 @@ void CameraAravisNodelet::onInit()
   }
 
   p_device_ = arv_camera_get_device(p_camera_);
-  ROS_INFO("Opened: %s-%s", arv_camera_get_vendor_name(p_camera_),
+  RCLCPP_INFO(rclcpp::get_logger(),("Opened: %s-%s", arv_camera_get_vendor_name(p_camera_),
            arv_device_get_string_feature_value(p_device_, "DeviceSerialNumber"));
 
-  // Start the dynamic_reconfigure server.
-  reconfigure_server_.reset(new dynamic_reconfigure::Server<Config>(reconfigure_mutex_, pnh));
-  reconfigure_server_->getConfigDefault(config_);
-  reconfigure_server_->getConfigMin(config_min_);
-  reconfigure_server_->getConfigMax(config_max_);
+  // // Start the dynamic_reconfigure server.
+  // reconfigure_server_.reset(new dynamic_reconfigure::Server<Config>(reconfigure_mutex_, pnh));
+  // reconfigure_server_->getConfigDefault(config_);
+  // reconfigure_server_->getConfigMin(config_min_);
+  // reconfigure_server_->getConfigMax(config_max_);
 
   // See which features exist in this camera device
   discoverFeatures();
@@ -554,7 +573,7 @@ void CameraAravisNodelet::onInit()
   if (num_streams_ == 0) {
     num_streams_ = arv_device_get_integer_feature_value(p_device_, "GevStreamChannelCount");
   }
-  ROS_INFO("Number of supported stream channels %i.", (int) num_streams_);
+  RCLCPP_INFO(rclcpp::get_logger(),("Number of supported stream channels %i.", (int) num_streams_);
 
   std::string stream_channel_args;
   if (pnh.getParam("channel_names", stream_channel_args)) {
@@ -673,7 +692,7 @@ void CameraAravisNodelet::onInit()
       convert_formats.push_back(sensor_iter->second);
     }
     else {
-      ROS_WARN_STREAM("There is no known conversion from " << sensors_[i]->pixel_format << " to a usual ROS image encoding. Likely you need to implement one.");
+      RCLCPP_WARN_STREAM(rclcpp::get_logger(), "There is no known conversion from " << sensors_[i]->pixel_format << " to a usual ROS image encoding. Likely you need to implement one.");
     }
 
     sensors_[i]->n_bits_pixel = ARV_PIXEL_FORMAT_BIT_PER_PIXEL(
@@ -722,7 +741,7 @@ void CameraAravisNodelet::onInit()
     {
       // publish static tf only once (latched)
       p_stb_.reset(new tf2_ros::StaticTransformBroadcaster());
-      tf_optical_.header.stamp = ros::Time::now();
+      tf_optical_.header.stamp = rclcpp::Time::now();
       p_stb_->sendTransform(tf_optical_);
     }
   }
@@ -764,75 +783,75 @@ void CameraAravisNodelet::onInit()
     }
 
     
-    ROS_INFO("Reset %s Camera Info Manager", stream_names_[i].c_str());
-    ROS_INFO("%s Calib URL: %s", stream_names_[i].c_str(), calib_urls[i].c_str());
+    RCLCPP_INFO(rclcpp::get_logger(),("Reset %s Camera Info Manager", stream_names_[i].c_str());
+    RCLCPP_INFO(rclcpp::get_logger(),("%s Calib URL: %s", stream_names_[i].c_str(), calib_urls[i].c_str());
 
     // publish an ExtendedCameraInfo message
     setExtendedCameraInfo(stream_names_[i], i);
   }
 
   // update the reconfigure config
-  reconfigure_server_->setConfigMin(config_min_);
-  reconfigure_server_->setConfigMax(config_max_);
-  reconfigure_server_->updateConfig(config_);
-  ros::Duration(2.0).sleep();
-  reconfigure_server_->setCallback(boost::bind(&CameraAravisNodelet::rosReconfigureCallback, this, _1, _2));
+  // reconfigure_server_->setConfigMin(config_min_);
+  // reconfigure_server_->setConfigMax(config_max_);
+  // reconfigure_server_->updateConfig(config_);
+  // ros::Duration(2.0).sleep();
+  // reconfigure_server_->setCallback(std::bind(&CameraAravisNodelet::rosReconfigureCallback, this, _1, _2));
 
   // Print information.
-  ROS_INFO("    Using Camera Configuration:");
-  ROS_INFO("    ---------------------------");
-  ROS_INFO("    Vendor name          = %s", arv_device_get_string_feature_value(p_device_, "DeviceVendorName"));
-  ROS_INFO("    Model name           = %s", arv_device_get_string_feature_value(p_device_, "DeviceModelName"));
-  ROS_INFO("    Device id            = %s", arv_device_get_string_feature_value(p_device_, "DeviceUserID"));
-  ROS_INFO("    Serial number        = %s", arv_device_get_string_feature_value(p_device_, "DeviceSerialNumber"));
-  ROS_INFO(
+  RCLCPP_INFO(rclcpp::get_logger(),("    Using Camera Configuration:");
+  RCLCPP_INFO(rclcpp::get_logger(),("    ---------------------------");
+  RCLCPP_INFO(rclcpp::get_logger(),("    Vendor name          = %s", arv_device_get_string_feature_value(p_device_, "DeviceVendorName"));
+  RCLCPP_INFO(rclcpp::get_logger(),("    Model name           = %s", arv_device_get_string_feature_value(p_device_, "DeviceModelName"));
+  RCLCPP_INFO(rclcpp::get_logger(),("    Device id            = %s", arv_device_get_string_feature_value(p_device_, "DeviceUserID"));
+  RCLCPP_INFO(rclcpp::get_logger(),("    Serial number        = %s", arv_device_get_string_feature_value(p_device_, "DeviceSerialNumber"));
+  RCLCPP_INFO(rclcpp::get_logger(),(
       "    Type                 = %s",
       arv_camera_is_uv_device(p_camera_) ? "USB3Vision" :
           (arv_camera_is_gv_device(p_camera_) ? "GigEVision" : "Other"));
-  ROS_INFO("    Sensor width         = %d", sensors_[0]->width);
-  ROS_INFO("    Sensor height        = %d", sensors_[0]->height);
-  ROS_INFO("    ROI x,y,w,h          = %d, %d, %d, %d", roi_.x, roi_.y, roi_.width, roi_.height);
-  ROS_INFO("    Pixel format         = %s", sensors_[0]->pixel_format.c_str());
-  ROS_INFO("    BitsPerPixel         = %lu", sensors_[0]->n_bits_pixel);
-  ROS_INFO(
+  RCLCPP_INFO(rclcpp::get_logger(),("    Sensor width         = %d", sensors_[0]->width);
+  RCLCPP_INFO(rclcpp::get_logger(),("    Sensor height        = %d", sensors_[0]->height);
+  RCLCPP_INFO(rclcpp::get_logger(),("    ROI x,y,w,h          = %d, %d, %d, %d", roi_.x, roi_.y, roi_.width, roi_.height);
+  RCLCPP_INFO(rclcpp::get_logger(),("    Pixel format         = %s", sensors_[0]->pixel_format.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(),("    BitsPerPixel         = %lu", sensors_[0]->n_bits_pixel);
+  RCLCPP_INFO(rclcpp::get_logger(),(
       "    Acquisition Mode     = %s",
       implemented_features_["AcquisitionMode"] ? arv_device_get_string_feature_value(p_device_, "AcquisitionMode") :
           "(not implemented in camera)");
-  ROS_INFO(
+  RCLCPP_INFO(rclcpp::get_logger(),(
       "    Trigger Mode         = %s",
       implemented_features_["TriggerMode"] ? arv_device_get_string_feature_value(p_device_, "TriggerMode") :
           "(not implemented in camera)");
-  ROS_INFO(
+  RCLCPP_INFO(rclcpp::get_logger(),(
       "    Trigger Source       = %s",
       implemented_features_["TriggerSource"] ? arv_device_get_string_feature_value(p_device_, "TriggerSource") :
           "(not implemented in camera)");
-  ROS_INFO("    Can set FrameRate:     %s", implemented_features_["AcquisitionFrameRate"] ? "True" : "False");
+  RCLCPP_INFO(rclcpp::get_logger(),("    Can set FrameRate:     %s", implemented_features_["AcquisitionFrameRate"] ? "True" : "False");
   if (implemented_features_["AcquisitionFrameRate"])
   {
-    ROS_INFO("    AcquisitionFrameRate = %g hz", config_.AcquisitionFrameRate);
+    RCLCPP_INFO(rclcpp::get_logger(),("    AcquisitionFrameRate = %g hz", config_.AcquisitionFrameRate);
   }
 
-  ROS_INFO("    Can set Exposure:      %s", implemented_features_["ExposureTime"] ? "True" : "False");
+  RCLCPP_INFO(rclcpp::get_logger(),("    Can set Exposure:      %s", implemented_features_["ExposureTime"] ? "True" : "False");
   if (implemented_features_["ExposureTime"])
   {
-    ROS_INFO("    Can set ExposureAuto:  %s", implemented_features_["ExposureAuto"] ? "True" : "False");
-    ROS_INFO("    Exposure             = %g us in range [%g,%g]", config_.ExposureTime, config_min_.ExposureTime,
+    RCLCPP_INFO(rclcpp::get_logger(),("    Can set ExposureAuto:  %s", implemented_features_["ExposureAuto"] ? "True" : "False");
+    RCLCPP_INFO(rclcpp::get_logger(),("    Exposure             = %g us in range [%g,%g]", config_.ExposureTime, config_min_.ExposureTime,
              config_max_.ExposureTime);
   }
 
-  ROS_INFO("    Can set Gain:          %s", implemented_features_["Gain"] ? "True" : "False");
+  RCLCPP_INFO(rclcpp::get_logger(),("    Can set Gain:          %s", implemented_features_["Gain"] ? "True" : "False");
   if (implemented_features_["Gain"])
   {
-    ROS_INFO("    Can set GainAuto:      %s", implemented_features_["GainAuto"] ? "True" : "False");
-    ROS_INFO("    Gain                 = %f %% in range [%f,%f]", config_.Gain, config_min_.Gain, config_max_.Gain);
+    RCLCPP_INFO(rclcpp::get_logger(),("    Can set GainAuto:      %s", implemented_features_["GainAuto"] ? "True" : "False");
+    RCLCPP_INFO(rclcpp::get_logger(),("    Gain                 = %f %% in range [%f,%f]", config_.Gain, config_min_.Gain, config_max_.Gain);
   }
 
-  ROS_INFO("    Can set FocusPos:      %s", implemented_features_["FocusPos"] ? "True" : "False");
+  RCLCPP_INFO(rclcpp::get_logger(),("    Can set FocusPos:      %s", implemented_features_["FocusPos"] ? "True" : "False");
 
   if (implemented_features_["GevSCPSPacketSize"])
-    ROS_INFO("    Network mtu          = %lu", arv_device_get_integer_feature_value(p_device_, "GevSCPSPacketSize"));
+    RCLCPP_INFO(rclcpp::get_logger(),("    Network mtu          = %lu", arv_device_get_integer_feature_value(p_device_, "GevSCPSPacketSize"));
 
-  ROS_INFO("    ---------------------------");
+  RCLCPP_INFO(rclcpp::get_logger(),("    ---------------------------");
 
   // Reset PTP clock
   if (use_ptp_stamp_)
@@ -874,7 +893,7 @@ void CameraAravisNodelet::spawnStream()
       }
       else
       {
-        ROS_WARN("Stream %i: Could not create image stream for %s.  Retrying...", i, guid.c_str());
+        RCLCPP_WARN(rclcpp::get_logger(),"Stream %i: Could not create image stream for %s.  Retrying...", i, guid.c_str());
         ros::Duration(1.0).sleep();
         ros::spinOnce();
       }
@@ -933,7 +952,7 @@ void CameraAravisNodelet::spawnStream()
   this->set_string_service_ = pnh.advertiseService("set_string_feature_value", &CameraAravisNodelet::setStringFeatureCallback, this);
   this->set_boolean_service_ = pnh.advertiseService("set_boolean_feature_value", &CameraAravisNodelet::setBooleanFeatureCallback, this);
 
-  ROS_INFO("Done initializing camera_aravis.");
+  RCLCPP_INFO(rclcpp::get_logger(),("Done initializing camera_aravis.");
 }
 
 bool CameraAravisNodelet::getIntegerFeatureCallback(camera_aravis::get_integer_feature_value::Request& request, camera_aravis::get_integer_feature_value::Response& response)
@@ -1021,7 +1040,7 @@ void CameraAravisNodelet::resetPtpClock()
   std::string ptp_status(arv_device_get_string_feature_value(p_device_, "GevIEEE1588Status"));
   if (ptp_status != std::string("Slave"))
   {
-    ROS_INFO("camera_aravis: Reset ptp clock");
+    RCLCPP_INFO(rclcpp::get_logger(),("camera_aravis: Reset ptp clock");
     arv_device_set_boolean_feature_value(p_device_, "GevIEEE1588", false);
     arv_device_set_boolean_feature_value(p_device_, "GevIEEE1588", true);
   }
@@ -1285,7 +1304,7 @@ void CameraAravisNodelet::tuneGvStream(ArvGvStream *p_stream)
   {
     if (!ARV_IS_GV_STREAM(p_stream))
     {
-      ROS_WARN("Stream is not a GV_STREAM");
+      RCLCPP_WARN(rclcpp::get_logger(),"Stream is not a GV_STREAM");
       return;
     }
 
@@ -1305,7 +1324,7 @@ void CameraAravisNodelet::rosReconfigureCallback(Config &config, uint32_t level)
 {
   reconfigure_mutex_.lock();
   std::string tf_prefix = tf::getPrefixParam(getNodeHandle());
-  ROS_DEBUG_STREAM("tf_prefix: " << tf_prefix);
+  RCLCPP_DEBUG_STREAM(rclcpp::get_logger(), "tf_prefix: " << tf_prefix);
 
   if (config.frame_id == "")
     config.frame_id = this->getName();
@@ -1333,19 +1352,19 @@ void CameraAravisNodelet::rosReconfigureCallback(Config &config, uint32_t level)
   if (config.ExposureAuto.compare("Off") != 0)
   {
     config.ExposureTime = config_.ExposureTime;
-    ROS_WARN("ExposureAuto is active. Cannot manually set ExposureTime.");
+    RCLCPP_WARN(rclcpp::get_logger(),"ExposureAuto is active. Cannot manually set ExposureTime.");
   }
   if (config.GainAuto.compare("Off") != 0)
   {
     config.Gain = config_.Gain;
-    ROS_WARN("GainAuto is active. Cannot manually set Gain.");
+    RCLCPP_WARN(rclcpp::get_logger(),"GainAuto is active. Cannot manually set Gain.");
   }
 
   // reset FrameRate when triggered
   if (config.TriggerMode.compare("Off") != 0)
   {
     config.AcquisitionFrameRate = config_.AcquisitionFrameRate;
-    ROS_WARN("TriggerMode is active. Cannot manually set AcquisitionFrameRate.");
+    RCLCPP_WARN(rclcpp::get_logger(),"TriggerMode is active. Cannot manually set AcquisitionFrameRate.");
   }
 
   // Find valid user changes we need to react to.
@@ -1377,79 +1396,79 @@ void CameraAravisNodelet::rosReconfigureCallback(Config &config, uint32_t level)
   {
     if (implemented_features_["ExposureTime"])
     {
-      ROS_INFO("Set ExposureTime = %f us", config.ExposureTime);
+      RCLCPP_INFO(rclcpp::get_logger(),("Set ExposureTime = %f us", config.ExposureTime);
       arv_camera_set_exposure_time(p_camera_, config.ExposureTime);
     }
     else
-      ROS_INFO("Camera does not support ExposureTime.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support ExposureTime.");
   }
 
   if (changed_gain)
   {
     if (implemented_features_["Gain"])
     {
-      ROS_INFO("Set gain = %f", config.Gain);
+      RCLCPP_INFO(rclcpp::get_logger(),("Set gain = %f", config.Gain);
       arv_camera_set_gain(p_camera_, config.Gain);
     }
     else
-      ROS_INFO("Camera does not support Gain or GainRaw.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support Gain or GainRaw.");
   }
 
   if (changed_exposure_auto)
   {
     if (implemented_features_["ExposureAuto"] && implemented_features_["ExposureTime"])
     {
-      ROS_INFO("Set ExposureAuto = %s", config.ExposureAuto.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(),("Set ExposureAuto = %s", config.ExposureAuto.c_str());
       arv_device_set_string_feature_value(p_device_, "ExposureAuto", config.ExposureAuto.c_str());
       if (config.ExposureAuto.compare("Once") == 0)
       {
         ros::Duration(2.0).sleep();
         config.ExposureTime = arv_camera_get_exposure_time(p_camera_);
-        ROS_INFO("Get ExposureTime = %f us", config.ExposureTime);
+        RCLCPP_INFO(rclcpp::get_logger(),("Get ExposureTime = %f us", config.ExposureTime);
         config.ExposureAuto = "Off";
       }
     }
     else
-      ROS_INFO("Camera does not support ExposureAuto.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support ExposureAuto.");
   }
   if (changed_gain_auto)
   {
     if (implemented_features_["GainAuto"] && implemented_features_["Gain"])
     {
-      ROS_INFO("Set GainAuto = %s", config.GainAuto.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(),("Set GainAuto = %s", config.GainAuto.c_str());
       arv_device_set_string_feature_value(p_device_, "GainAuto", config.GainAuto.c_str());
       if (config.GainAuto.compare("Once") == 0)
       {
         ros::Duration(2.0).sleep();
         config.Gain = arv_camera_get_gain(p_camera_);
-        ROS_INFO("Get Gain = %f", config.Gain);
+        RCLCPP_INFO(rclcpp::get_logger(),("Get Gain = %f", config.Gain);
         config.GainAuto = "Off";
       }
     }
     else
-      ROS_INFO("Camera does not support GainAuto.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support GainAuto.");
   }
 
   if (changed_acquisition_frame_rate)
   {
     if (implemented_features_["AcquisitionFrameRate"])
     {
-      ROS_INFO("Set frame rate = %f Hz", config.AcquisitionFrameRate);
+      RCLCPP_INFO(rclcpp::get_logger(),("Set frame rate = %f Hz", config.AcquisitionFrameRate);
       arv_camera_set_frame_rate(p_camera_, config.AcquisitionFrameRate);
     }
     else
-      ROS_INFO("Camera does not support AcquisitionFrameRate.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support AcquisitionFrameRate.");
   }
 
   if (changed_trigger_mode)
   {
     if (implemented_features_["TriggerMode"])
     {
-      ROS_INFO("Set TriggerMode = %s", config.TriggerMode.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(),("Set TriggerMode = %s", config.TriggerMode.c_str());
       arv_device_set_string_feature_value(p_device_, "TriggerMode", config.TriggerMode.c_str());
     }
     else
-      ROS_INFO("Camera does not support TriggerMode.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerMode.");
   }
 
   if (changed_trigger_source)
@@ -1463,12 +1482,12 @@ void CameraAravisNodelet::rosReconfigureCallback(Config &config, uint32_t level)
 
     if (implemented_features_["TriggerSource"])
     {
-      ROS_INFO("Set TriggerSource = %s", config.TriggerSource.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(),("Set TriggerSource = %s", config.TriggerSource.c_str());
       arv_device_set_string_feature_value(p_device_, "TriggerSource", config.TriggerSource.c_str());
     }
     else
     {
-      ROS_INFO("Camera does not support TriggerSource.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerSource.");
     }
 
     // activate on demand
@@ -1477,14 +1496,14 @@ void CameraAravisNodelet::rosReconfigureCallback(Config &config, uint32_t level)
       if (implemented_features_["TriggerSoftware"])
       {
         config_.softwaretriggerrate = config.softwaretriggerrate;
-        ROS_INFO("Set softwaretriggerrate = %f", 1000.0 / ceil(1000.0 / config.softwaretriggerrate));
+        RCLCPP_INFO(rclcpp::get_logger(),("Set softwaretriggerrate = %f", 1000.0 / ceil(1000.0 / config.softwaretriggerrate));
 
         // Turn on software timer callback.
         software_trigger_thread_ = std::thread(&CameraAravisNodelet::softwareTriggerLoop, this);
       }
       else
       {
-        ROS_INFO("Camera does not support TriggerSoftware command.");
+        RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support TriggerSoftware command.");
       }
     }
   }
@@ -1493,44 +1512,44 @@ void CameraAravisNodelet::rosReconfigureCallback(Config &config, uint32_t level)
   {
     if (implemented_features_["FocusPos"])
     {
-      ROS_INFO("Set FocusPos = %d", config.FocusPos);
+      RCLCPP_INFO(rclcpp::get_logger(),("Set FocusPos = %d", config.FocusPos);
       arv_device_set_integer_feature_value(p_device_, "FocusPos", config.FocusPos);
       ros::Duration(1.0).sleep();
       config.FocusPos = arv_device_get_integer_feature_value(p_device_, "FocusPos");
-      ROS_INFO("Get FocusPos = %d", config.FocusPos);
+      RCLCPP_INFO(rclcpp::get_logger(),("Get FocusPos = %d", config.FocusPos);
     }
     else
-      ROS_INFO("Camera does not support FocusPos.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support FocusPos.");
   }
 
   if (changed_mtu)
   {
     if (implemented_features_["GevSCPSPacketSize"])
     {
-      ROS_INFO("Set mtu = %d", config.mtu);
+      RCLCPP_INFO(rclcpp::get_logger(),("Set mtu = %d", config.mtu);
       arv_device_set_integer_feature_value(p_device_, "GevSCPSPacketSize", config.mtu);
       ros::Duration(1.0).sleep();
       config.mtu = arv_device_get_integer_feature_value(p_device_, "GevSCPSPacketSize");
-      ROS_INFO("Get mtu = %d", config.mtu);
+      RCLCPP_INFO(rclcpp::get_logger(),("Get mtu = %d", config.mtu);
     }
     else
-      ROS_INFO("Camera does not support mtu (i.e. GevSCPSPacketSize).");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support mtu (i.e. GevSCPSPacketSize).");
   }
 
   if (changed_acquisition_mode)
   {
     if (implemented_features_["AcquisitionMode"])
     {
-      ROS_INFO("Set AcquisitionMode = %s", config.AcquisitionMode.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(),("Set AcquisitionMode = %s", config.AcquisitionMode.c_str());
       arv_device_set_string_feature_value(p_device_, "AcquisitionMode", config.AcquisitionMode.c_str());
 
-      ROS_INFO("AcquisitionStop");
+      RCLCPP_INFO(rclcpp::get_logger(),("AcquisitionStop");
       arv_device_execute_command(p_device_, "AcquisitionStop");
-      ROS_INFO("AcquisitionStart");
+      RCLCPP_INFO(rclcpp::get_logger(),("AcquisitionStart");
       arv_device_execute_command(p_device_, "AcquisitionStart");
     }
     else
-      ROS_INFO("Camera does not support AcquisitionMode.");
+      RCLCPP_INFO(rclcpp::get_logger(),("Camera does not support AcquisitionMode.");
   }
 
   // adopt new config
@@ -1592,7 +1611,7 @@ void CameraAravisNodelet::newBufferReady(ArvStream *p_stream, CameraAravisNodele
     {
       (p_can->n_buffers_)++;
       // get the image message which wraps around this buffer
-      sensor_msgs::ImagePtr msg_ptr = (*(p_can->p_buffer_pools_[stream_id]))[p_buffer];
+      std::shared_ptr<sensor_msgs::msg::Image> msg_ptr = (*(p_can->p_buffer_pools_[stream_id]))[p_buffer];
       // fill the meta information of image message
       // get acquisition time
       guint64 t;
@@ -1612,7 +1631,7 @@ void CameraAravisNodelet::newBufferReady(ArvStream *p_stream, CameraAravisNodele
 
       // do the magic of conversion into a ROS format
       if (p_can->convert_formats[stream_id]) {
-        sensor_msgs::ImagePtr cvt_msg_ptr = p_can->p_buffer_pools_[stream_id]->getRecyclableImg();
+        std::shared_ptr<sensor_msgs::msg::Image> cvt_msg_ptr = p_can->p_buffer_pools_[stream_id]->getRecyclableImg();
         p_can->convert_formats[stream_id](msg_ptr, cvt_msg_ptr);
         msg_ptr = cvt_msg_ptr;
       }
@@ -1624,7 +1643,7 @@ void CameraAravisNodelet::newBufferReady(ArvStream *p_stream, CameraAravisNodele
       (*p_can->camera_infos_[stream_id]) = p_can->p_camera_info_managers_[stream_id]->getCameraInfo();
       p_can->camera_infos_[stream_id]->header = msg_ptr->header;
       if (p_can->camera_infos_[stream_id]->width == 0 || p_can->camera_infos_[stream_id]->height == 0) {
-        ROS_WARN_STREAM_ONCE(
+        RCLCPP_WARN_STREAM(rclcpp::get_logger(),
             "The fields image_width and image_height seem not to be set in "
             "the YAML specified by 'camera_info_url' parameter. Please set "
             "them there, because actual image size and specified image size "
@@ -1655,7 +1674,7 @@ void CameraAravisNodelet::newBufferReady(ArvStream *p_stream, CameraAravisNodele
     else
     {
       if (arv_buffer_get_status(p_buffer) != ARV_BUFFER_STATUS_SUCCESS) {
-        ROS_WARN("(%s) Frame error: %s", frame_id.c_str(), szBufferStatusFromInt[arv_buffer_get_status(p_buffer)]);
+        RCLCPP_WARN(rclcpp::get_logger(),"(%s) Frame error: %s", frame_id.c_str(), szBufferStatusFromInt[arv_buffer_get_status(p_buffer)]);
       }
       arv_stream_push_buffer(p_stream, p_buffer);
     }
@@ -1749,7 +1768,7 @@ void CameraAravisNodelet::fillExtendedCameraInfoMessage(ExtendedCameraInfo &msg)
 void CameraAravisNodelet::controlLostCallback(ArvDevice *p_gv_device, gpointer can_instance)
 {
   CameraAravisNodelet *p_can = (CameraAravisNodelet*)can_instance;
-  ROS_ERROR("Control to aravis device lost.");
+  RCLCPP_ERROR(rclcpp::get_logger(),"Control to aravis device lost.");
   nodelet::NodeletUnload unload_service;
   unload_service.request.name = p_can->getName();
   if (false == ros::service::call(ros::this_node::getName() + "/unload_nodelet", unload_service))
@@ -1761,7 +1780,7 @@ void CameraAravisNodelet::controlLostCallback(ArvDevice *p_gv_device, gpointer c
 void CameraAravisNodelet::softwareTriggerLoop()
 {
   software_trigger_active_ = true;
-  ROS_INFO("Software trigger started.");
+  RCLCPP_INFO(rclcpp::get_logger(),("Software trigger started.");
   std::chrono::system_clock::time_point next_time = std::chrono::system_clock::now();
   while (ros::ok() && software_trigger_active_)
   {
@@ -1778,26 +1797,26 @@ void CameraAravisNodelet::softwareTriggerLoop()
     }
     else
     {
-      ROS_WARN("Camera Aravis: Missed a software trigger event.");
+      RCLCPP_WARN(rclcpp::get_logger(),"Camera Aravis: Missed a software trigger event.");
       next_time = std::chrono::system_clock::now();
     }
   }
-  ROS_INFO("Software trigger stopped.");
+  RCLCPP_INFO(rclcpp::get_logger(),("Software trigger stopped.");
 }
 
 void CameraAravisNodelet::publishTfLoop(double rate)
 {
   // Publish optical transform for the camera
-  ROS_WARN("Publishing dynamic camera transforms (/tf) at %g Hz", rate);
+  RCLCPP_WARN(rclcpp::get_logger(),"Publishing dynamic camera transforms (/tf) at %g Hz", rate);
 
   tf_thread_active_ = true;
 
-  ros::Rate loop_rate(rate);
+  rclcpp::Rate loop_rate(rate);
 
   while (ros::ok() && tf_thread_active_)
   {
     // Update the header for publication
-    tf_optical_.header.stamp = ros::Time::now();
+    tf_optical_.header.stamp = rclcpp::Time::now();
     ++tf_optical_.header.seq;
     p_tb_->sendTransform(tf_optical_);
 
@@ -1848,7 +1867,7 @@ void CameraAravisNodelet::discoverFeatures()
       const std::string fname(arv_gc_feature_node_get_name(fnode));
       const bool usable = arv_gc_feature_node_is_available(fnode, NULL)
           && arv_gc_feature_node_is_implemented(fnode, NULL);
-      ROS_INFO_STREAM("Feature " << fname << " is " << usable);
+      RCLCPP_INFO(rclcpp::get_logger(),_STREAM("Feature " << fname << " is " << usable);
       implemented_features_.emplace(fname, usable);
       //}
     }
@@ -1856,7 +1875,7 @@ void CameraAravisNodelet::discoverFeatures()
 //		if (ARV_IS_GC_PROPERTY_NODE(node)) {
 //			ArvGcPropertyNode* pnode = ARV_GC_PROPERTY_NODE(node);
 //			const std::string pname(arv_gc_property_node_get_name(pnode));
-//			ROS_INFO_STREAM("Property " << pname << " found");
+//			RCLCPP_INFO(rclcpp::get_logger(),_STREAM("Property " << pname << " found");
 //		}
 
     // add children in todo-list
@@ -1878,8 +1897,7 @@ void CameraAravisNodelet::parseStringArgs(std::string in_arg_string, std::vector
         while (ss.good()) {
           std::string temp;
           getline( ss, temp, ',');
-          boost::trim_left(temp);
-          boost::trim_right(temp);
+          temp = trim(temp);
           out_args.push_back(temp);
         }
   } else {
@@ -1916,7 +1934,7 @@ void CameraAravisNodelet::writeCameraFeaturesFromRosparam()
       if (p_gc_node && arv_gc_feature_node_is_implemented(ARV_GC_FEATURE_NODE(p_gc_node), &error))
       {
         //				unsigned long	typeValue = arv_gc_feature_node_get_value_type((ArvGcFeatureNode *)pGcNode);
-        //				ROS_INFO("%s cameratype=%lu, rosparamtype=%d", key.c_str(), typeValue, static_cast<int>(iter->second.getType()));
+        //				RCLCPP_INFO(rclcpp::get_logger(),("%s cameratype=%lu, rosparamtype=%d", key.c_str(), typeValue, static_cast<int>(iter->second.getType()));
 
         // We'd like to check the value types too, but typeValue is often given as G_TYPE_INVALID, so ignore it.
         switch (iter->second.getType())
@@ -1925,7 +1943,7 @@ void CameraAravisNodelet::writeCameraFeaturesFromRosparam()
           {
             int value = (bool)iter->second;
             arv_device_set_integer_feature_value(p_device_, key.c_str(), value);
-            ROS_INFO("Read parameter (bool) %s: %d", key.c_str(), value);
+            RCLCPP_INFO(rclcpp::get_logger(),("Read parameter (bool) %s: %d", key.c_str(), value);
           }
             break;
 
@@ -1933,7 +1951,7 @@ void CameraAravisNodelet::writeCameraFeaturesFromRosparam()
           {
             int value = (int)iter->second;
             arv_device_set_integer_feature_value(p_device_, key.c_str(), value);
-            ROS_INFO("Read parameter (int) %s: %d", key.c_str(), value);
+            RCLCPP_INFO(rclcpp::get_logger(),("Read parameter (int) %s: %d", key.c_str(), value);
           }
             break;
 
@@ -1941,7 +1959,7 @@ void CameraAravisNodelet::writeCameraFeaturesFromRosparam()
           {
             double value = (double)iter->second;
             arv_device_set_float_feature_value(p_device_, key.c_str(), value);
-            ROS_INFO("Read parameter (float) %s: %f", key.c_str(), value);
+            RCLCPP_INFO(rclcpp::get_logger(),("Read parameter (float) %s: %f", key.c_str(), value);
           }
             break;
 
@@ -1949,7 +1967,7 @@ void CameraAravisNodelet::writeCameraFeaturesFromRosparam()
           {
             std::string value = (std::string)iter->second;
             arv_device_set_string_feature_value(p_device_, key.c_str(), value.c_str());
-            ROS_INFO("Read parameter (string) %s: %s", key.c_str(), value.c_str());
+            RCLCPP_INFO(rclcpp::get_logger(),("Read parameter (string) %s: %s", key.c_str(), value.c_str());
           }
             break;
 
@@ -1959,7 +1977,7 @@ void CameraAravisNodelet::writeCameraFeaturesFromRosparam()
           case XmlRpc::XmlRpcValue::TypeArray:
           case XmlRpc::XmlRpcValue::TypeStruct:
           default:
-            ROS_WARN("Unhandled rosparam type in writeCameraFeaturesFromRosparam()");
+            RCLCPP_WARN(rclcpp::get_logger(),"Unhandled rosparam type in writeCameraFeaturesFromRosparam()");
         }
       }
     }

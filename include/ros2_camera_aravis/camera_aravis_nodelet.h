@@ -33,10 +33,12 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <string>
 #include <algorithm>
 #include <functional>
 #include <cctype>
 #include <memory>
+#include <mutex>
 #include <atomic>
 #include <thread>
 #include <chrono>
@@ -45,34 +47,28 @@ extern "C" {
 #include <glib.h>
 
 #include <rclcpp/rclcpp.hpp>
-#include <nodelet/nodelet.h>
-#include <nodelet/NodeletUnload.h>
-#include <ros/time.h>
-#include <ros/duration.h>
-#include <sensor_msgs/msg/image.hpp>
-#include <std_msgs/msg/int64.hpp>
-#include <sensor_msgs/msg/image_encodings.hpp>
-#include <image_transport/image_transport.h>
-#include <camera_info_manager/camera_info_manager.h>
-#include <boost/algorithm/string/trim.hpp>
 
-#include <dynamic_reconfigure/server.h>
-#include <dynamic_reconfigure/SensorLevels.h>
-#include <tf/transform_listener.h>
+#include <std_msgs/msg/int64.hpp>
+#include <sensor_msgs/image_encodings.hpp>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/camera_info.hpp>
+#include <image_transport/camera_publisher.hpp>
+#include <image_transport/image_transport.hpp>
+#include <image_transport/publisher.hpp>
+#include <camera_info_manager/camera_info_manager.h>
+
+#include <tf2_ros/transform_listener.h>
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
-#include <ros2_camera_aravis/CameraAravisConfig.h>
-#include <ros2_camera_aravis/CameraAutoInfo.h>
-#include <ros2_camera_aravis/ExtendedCameraInfo.h>
 
-#include <ros2_camera_aravis/get_integer_feature_value.h>
-#include <ros2_camera_aravis/set_integer_feature_value.h>
-#include <ros2_camera_aravis/get_float_feature_value.h>
-#include <ros2_camera_aravis/set_float_feature_value.h>
-#include <ros2_camera_aravis/get_string_feature_value.h>
-#include <ros2_camera_aravis/set_string_feature_value.h>
-#include <ros2_camera_aravis/get_boolean_feature_value.h>
-#include <ros2_camera_aravis/set_boolean_feature_value.h>
+#include <ros2_camera_aravis/srv/get_integer_feature.hpp>
+#include <ros2_camera_aravis/srv/set_integer_value.hpp>
+#include <ros2_camera_aravis/srv/get_float_feature.hpp>
+#include <ros2_camera_aravis/srv/set_float_value.hpp>
+#include <ros2_camera_aravis/srv/get_string_feature.hpp>
+#include <ros2_camera_aravis/srv/set_string_feature.hpp>
+#include <ros2_camera_aravis/srv/get_boolean_feature.hpp>
+#include <ros2_camera_aravis/srv/set_boolean_value.hpp>
 
 #include "camera_buffer_pool.h"
 
@@ -88,118 +84,118 @@ const char *szBufferStatusFromInt[] = {"ARV_BUFFER_STATUS_SUCCESS", "ARV_BUFFER_
                                        "ARV_BUFFER_STATUS_FILLING", "ARV_BUFFER_STATUS_ABORTED"};
 
 // Conversion functions from Genicam to ROS formats
-typedef std::function<void(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out)> ConversionFunction;
-void renameImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format);
-void shiftImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const size_t n_digits, const std::string out_format);
-void interleaveImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const size_t n_digits, const std::string out_format);
-void unpack10p32Img(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format);
-void unpack10PackedImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format);
-void unpack10pMonoImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format);
-void unpack10PackedMonoImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format);
-void unpack12pImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format);
-void unpack12PackedImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format);
-void unpack565pImg(sensor_msgs::ImagePtr& in, sensor_msgs::ImagePtr& out, const std::string out_format);
+typedef std::function<void(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out)> ConversionFunction;
+void renameImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format);
+void shiftImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const size_t n_digits, const std::string out_format);
+void interleaveImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const size_t n_digits, const std::string out_format);
+void unpack10p32Img(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format);
+void unpack10PackedImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format);
+void unpack10pMonoImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format);
+void unpack10PackedMonoImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format);
+void unpack12pImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format);
+void unpack12PackedImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format);
+void unpack565pImg(std::shared_ptr<sensor_msgs::msg::Image>& in, std::shared_ptr<sensor_msgs::msg::Image>& out, const std::string out_format);
 
 const std::map<std::string, ConversionFunction> CONVERSIONS_DICTIONARY =
 {
  // equivalent to official ROS color encodings
- { "RGB8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB8) },
- { "RGBa8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGBA8) },
- { "RGB16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
- { "RGBa16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGBA16) },
- { "BGR8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGR8) },
- { "BGRa8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGRA8) },
- { "BGR16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGR16) },
- { "BGRa16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGRA16) },
- { "Mono8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
- { "Raw8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
- { "R8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
- { "G8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
- { "B8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
- { "Mono16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "Raw16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "R16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "G16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "B16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "BayerRG8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB8) },
- { "BayerBG8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR8) },
- { "BayerGB8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG8) },
- { "BayerGR8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG8) },
- { "BayerRG16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
- { "BayerBG16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
- { "BayerGB16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
- { "BayerGR16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
- { "YUV422_8_UYVY", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::YUV422) },
- { "YUV422_8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::YUV422) },
+ { "RGB8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB8) },
+ { "RGBa8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGBA8) },
+ { "RGB16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
+ { "RGBa16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGBA16) },
+ { "BGR8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGR8) },
+ { "BGRa8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGRA8) },
+ { "BGR16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGR16) },
+ { "BGRa16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGRA16) },
+ { "Mono8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
+ { "Raw8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
+ { "R8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
+ { "G8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
+ { "B8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO8) },
+ { "Mono16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "Raw16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "R16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "G16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "B16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "BayerRG8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB8) },
+ { "BayerBG8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR8) },
+ { "BayerGB8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG8) },
+ { "BayerGR8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG8) },
+ { "BayerRG16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
+ { "BayerBG16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
+ { "BayerGB16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
+ { "BayerGR16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
+ { "YUV422_8_UYVY", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::YUV422) },
+ { "YUV422_8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::YUV422) },
  // non-color contents
- { "Data8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_8UC1) },
- { "Confidence8", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_8UC1) },
- { "Data8s", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_8SC1) },
- { "Data16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_16UC1) },
- { "Confidence16", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_16UC1) },
- { "Data16s", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_16SC1) },
- { "Data32s", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_32SC1) },
- { "Data32f", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_32FC1) },
- { "Confidence32f", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_32FC1) },
- { "Data64f", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::TYPE_64FC1) },
+ { "Data8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_8UC1) },
+ { "Confidence8", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_8UC1) },
+ { "Data8s", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_8SC1) },
+ { "Data16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_16UC1) },
+ { "Confidence16", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_16UC1) },
+ { "Data16s", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_16SC1) },
+ { "Data32s", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_32SC1) },
+ { "Data32f", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_32FC1) },
+ { "Confidence32f", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_32FC1) },
+ { "Data64f", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::TYPE_64FC1) },
  // unthrifty formats. Shift away padding Bits for use with ROS.
- { "Mono10", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 6, sensor_msgs::image_encodings::MONO16) },
- { "Mono12", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 4, sensor_msgs::image_encodings::MONO16) },
- { "Mono14", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 2, sensor_msgs::image_encodings::MONO16) },
- { "RGB10", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 6, sensor_msgs::image_encodings::RGB16) },
- { "RGB12", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 4, sensor_msgs::image_encodings::RGB16) },
- { "BGR10", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 6, sensor_msgs::image_encodings::BGR16) },
- { "BGR12", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 4, sensor_msgs::image_encodings::BGR16) },
- { "BayerRG10", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 6, sensor_msgs::image_encodings::BAYER_RGGB16) },
- { "BayerBG10", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 6, sensor_msgs::image_encodings::BAYER_BGGR16) },
- { "BayerGB10", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 6, sensor_msgs::image_encodings::BAYER_GBRG16) },
- { "BayerGR10", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 6, sensor_msgs::image_encodings::BAYER_GRBG16) },
- { "BayerRG12", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 4, sensor_msgs::image_encodings::BAYER_RGGB16) },
- { "BayerBG12", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 4, sensor_msgs::image_encodings::BAYER_BGGR16) },
- { "BayerGB12", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 4, sensor_msgs::image_encodings::BAYER_GBRG16) },
- { "BayerGR12", boost::bind(&shiftImg, boost::placeholders::_1, boost::placeholders::_2, 4, sensor_msgs::image_encodings::BAYER_GRBG16) },
+ { "Mono10", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 6, sensor_msgs::image_encodings::MONO16) },
+ { "Mono12", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 4, sensor_msgs::image_encodings::MONO16) },
+ { "Mono14", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 2, sensor_msgs::image_encodings::MONO16) },
+ { "RGB10", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 6, sensor_msgs::image_encodings::RGB16) },
+ { "RGB12", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 4, sensor_msgs::image_encodings::RGB16) },
+ { "BGR10", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 6, sensor_msgs::image_encodings::BGR16) },
+ { "BGR12", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 4, sensor_msgs::image_encodings::BGR16) },
+ { "BayerRG10", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 6, sensor_msgs::image_encodings::BAYER_RGGB16) },
+ { "BayerBG10", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 6, sensor_msgs::image_encodings::BAYER_BGGR16) },
+ { "BayerGB10", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 6, sensor_msgs::image_encodings::BAYER_GBRG16) },
+ { "BayerGR10", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 6, sensor_msgs::image_encodings::BAYER_GRBG16) },
+ { "BayerRG12", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 4, sensor_msgs::image_encodings::BAYER_RGGB16) },
+ { "BayerBG12", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 4, sensor_msgs::image_encodings::BAYER_BGGR16) },
+ { "BayerGB12", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 4, sensor_msgs::image_encodings::BAYER_GBRG16) },
+ { "BayerGR12", std::bind(&shiftImg, std::placeholders::_1, std::placeholders::_2, 4, sensor_msgs::image_encodings::BAYER_GRBG16) },
  // planar instead pixel-by-pixel encodings
- { "RGB8_Planar", boost::bind(&interleaveImg, boost::placeholders::_1, boost::placeholders::_2, 0, sensor_msgs::image_encodings::RGB8) },
- { "RGB10_Planar", boost::bind(&interleaveImg, boost::placeholders::_1, boost::placeholders::_2, 6, sensor_msgs::image_encodings::RGB16) },
- { "RGB12_Planar", boost::bind(&interleaveImg, boost::placeholders::_1, boost::placeholders::_2, 4, sensor_msgs::image_encodings::RGB16) },
- { "RGB16_Planar", boost::bind(&interleaveImg, boost::placeholders::_1, boost::placeholders::_2, 0, sensor_msgs::image_encodings::RGB16) },
+ { "RGB8_Planar", std::bind(&interleaveImg, std::placeholders::_1, std::placeholders::_2, 0, sensor_msgs::image_encodings::RGB8) },
+ { "RGB10_Planar", std::bind(&interleaveImg, std::placeholders::_1, std::placeholders::_2, 6, sensor_msgs::image_encodings::RGB16) },
+ { "RGB12_Planar", std::bind(&interleaveImg, std::placeholders::_1, std::placeholders::_2, 4, sensor_msgs::image_encodings::RGB16) },
+ { "RGB16_Planar", std::bind(&interleaveImg, std::placeholders::_1, std::placeholders::_2, 0, sensor_msgs::image_encodings::RGB16) },
  // packed, non-Byte aligned formats
- { "Mono10p", boost::bind(&unpack10pMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "RGB10p", boost::bind(&unpack10p32Img, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
- { "RGB10p32", boost::bind(&unpack10p32Img, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
- { "RGBa10p", boost::bind(&unpack10p32Img, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGBA16) },
- { "BGR10p", boost::bind(&unpack10p32Img, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGR16) },
- { "BGRa10p", boost::bind(&unpack10p32Img, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGRA16) },
- { "BayerRG10p", boost::bind(&unpack10pMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
- { "BayerBG10p", boost::bind(&unpack10pMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
- { "BayerGB10p", boost::bind(&unpack10pMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
- { "BayerGR10p", boost::bind(&unpack10pMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
- { "Mono12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "RGB12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
- { "RGBa12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGBA16) },
- { "BGR12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGR16) },
- { "BGRa12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGRA16) },
- { "BayerRG12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
- { "BayerBG12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
- { "BayerGB12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
- { "BayerGR12p", boost::bind(&unpack12pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
- { "RGB565p", boost::bind(&unpack565pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB8) },
- { "BGR565p", boost::bind(&unpack565pImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BGR8) },
+ { "Mono10p", std::bind(&unpack10pMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "RGB10p", std::bind(&unpack10p32Img, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
+ { "RGB10p32", std::bind(&unpack10p32Img, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
+ { "RGBa10p", std::bind(&unpack10p32Img, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGBA16) },
+ { "BGR10p", std::bind(&unpack10p32Img, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGR16) },
+ { "BGRa10p", std::bind(&unpack10p32Img, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGRA16) },
+ { "BayerRG10p", std::bind(&unpack10pMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
+ { "BayerBG10p", std::bind(&unpack10pMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
+ { "BayerGB10p", std::bind(&unpack10pMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
+ { "BayerGR10p", std::bind(&unpack10pMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
+ { "Mono12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "RGB12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
+ { "RGBa12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGBA16) },
+ { "BGR12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGR16) },
+ { "BGRa12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGRA16) },
+ { "BayerRG12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
+ { "BayerBG12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
+ { "BayerGB12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
+ { "BayerGR12p", std::bind(&unpack12pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
+ { "RGB565p", std::bind(&unpack565pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB8) },
+ { "BGR565p", std::bind(&unpack565pImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BGR8) },
  // GigE-Vision specific format naming
- { "RGB10V1Packed", boost::bind(&unpack10PackedImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
- { "RGB10V2Packed", boost::bind(&unpack10p32Img, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
- { "RGB12V1Packed", boost::bind(&unpack12PackedImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
- { "Mono10Packed", boost::bind(&unpack10PackedMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "Mono12Packed", boost::bind(&unpack12PackedImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
- { "BayerRG10Packed", boost::bind(&unpack10PackedMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
- { "BayerBG10Packed", boost::bind(&unpack10PackedMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
- { "BayerGB10Packed", boost::bind(&unpack10PackedMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
- { "BayerGR10Packed", boost::bind(&unpack10PackedMonoImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
- { "BayerRG12Packed", boost::bind(&unpack12PackedImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
- { "BayerBG12Packed", boost::bind(&unpack12PackedImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
- { "BayerGB12Packed", boost::bind(&unpack12PackedImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
- { "BayerGR12Packed", boost::bind(&unpack12PackedImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
- { "YUV422Packed", boost::bind(&renameImg, boost::placeholders::_1, boost::placeholders::_2, sensor_msgs::image_encodings::YUV422) }
+ { "RGB10V1Packed", std::bind(&unpack10PackedImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
+ { "RGB10V2Packed", std::bind(&unpack10p32Img, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
+ { "RGB12V1Packed", std::bind(&unpack12PackedImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::RGB16) },
+ { "Mono10Packed", std::bind(&unpack10PackedMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "Mono12Packed", std::bind(&unpack12PackedImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::MONO16) },
+ { "BayerRG10Packed", std::bind(&unpack10PackedMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
+ { "BayerBG10Packed", std::bind(&unpack10PackedMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
+ { "BayerGB10Packed", std::bind(&unpack10PackedMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
+ { "BayerGR10Packed", std::bind(&unpack10PackedMonoImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
+ { "BayerRG12Packed", std::bind(&unpack12PackedImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_RGGB16) },
+ { "BayerBG12Packed", std::bind(&unpack12PackedImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_BGGR16) },
+ { "BayerGB12Packed", std::bind(&unpack12PackedImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GBRG16) },
+ { "BayerGR12Packed", std::bind(&unpack12PackedImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::BAYER_GRBG16) },
+ { "YUV422Packed", std::bind(&renameImg, std::placeholders::_1, std::placeholders::_2, sensor_msgs::image_encodings::YUV422) }
 };
 
 class CameraAravisNodelet : public nodelet::Nodelet
@@ -287,8 +283,8 @@ protected:
   // integers are integers, doubles are doubles, etc.
   void writeCameraFeaturesFromRosparam();
 
-  std::unique_ptr<dynamic_reconfigure::Server<Config> > reconfigure_server_;
-  boost::recursive_mutex reconfigure_mutex_;
+  // std::unique_ptr<dynamic_reconfigure::Server<Config> > reconfigure_server_;
+  std::recursive_mutex reconfigure_mutex_;
 
   std::vector<image_transport::CameraPublisher> cam_pubs_;
   std::vector<std::unique_ptr<camera_info_manager::CameraInfoManager>> p_camera_info_managers_;
@@ -305,7 +301,7 @@ protected:
   ros::Publisher auto_pub_;
   ros::Subscriber auto_sub_;
 
-  boost::recursive_mutex extended_camera_info_mutex_;
+  std::recursive_mutex extended_camera_info_mutex_;
   std::vector<ros::Publisher> extended_camera_info_pubs_;
 
   Config config_;

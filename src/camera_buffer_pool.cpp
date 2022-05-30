@@ -38,30 +38,30 @@ CameraBufferPool::~CameraBufferPool()
 {
 }
 
-sensor_msgs::ImagePtr CameraBufferPool::getRecyclableImg()
+std::shared_ptr<sensor_msgs::msg::Image> CameraBufferPool::getRecyclableImg()
 {
   std::lock_guard<std::mutex> lock(mutex_);
   if (dangling_imgs_.empty()) {
-    return sensor_msgs::ImagePtr(new sensor_msgs::Image, boost::bind(&CameraBufferPool::reclaim, this->weak_from_this(), boost::placeholders::_1));
+    return std::shared_ptr<sensor_msgs::msg::Image>(std::make_shared<sensor_msgs::msg::Image>(), std::bind(&CameraBufferPool::reclaim, this->weak_from_this(), std::placeholders::_1));
   }
   else {
-    sensor_msgs::ImagePtr img_ptr = dangling_imgs_.top();
+    std::shared_ptr<sensor_msgs::msg::Image> img_ptr = dangling_imgs_.top();
     dangling_imgs_.pop();
     return img_ptr;
   }
 }
 
-sensor_msgs::ImagePtr CameraBufferPool::operator[](ArvBuffer *buffer)
+std::shared_ptr<sensor_msgs::msg::Image> CameraBufferPool::operator[](ArvBuffer *buffer)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  sensor_msgs::ImagePtr img_ptr;
+  std::shared_ptr<sensor_msgs::msg::Image> img_ptr;
   if (buffer) {
     // get address and size
     size_t buffer_size;
     const uint8_t *buffer_data = (const uint8_t*)arv_buffer_get_data(buffer, &buffer_size);
 
     // find corresponding ImagePtr wrapper
-    std::map<const uint8_t*, sensor_msgs::ImagePtr>::iterator iter = available_img_buffers_.find(buffer_data);
+    std::map<const uint8_t*, std::shared_ptr<sensor_msgs::msg::Image>>::iterator iter = available_img_buffers_.find(buffer_data);
     if (iter != available_img_buffers_.end())
     {
       img_ptr = iter->second;
@@ -70,8 +70,8 @@ sensor_msgs::ImagePtr CameraBufferPool::operator[](ArvBuffer *buffer)
     }
     else
     {
-      ROS_WARN("Could not find available image in pool corresponding to buffer.");
-      img_ptr.reset(new sensor_msgs::Image);
+      // RCLCPP_WARN(rclcpp::get_logger(),"Could not find available image in pool corresponding to buffer.");
+      img_ptr.reset(std::make_shared<sensor_msgs::msg::Image>());
       img_ptr->data.resize(buffer_size);
       memcpy(img_ptr->data.data(), buffer_data, buffer_size);
     }
@@ -88,20 +88,21 @@ void CameraBufferPool::allocateBuffers(size_t n)
   {
     for (size_t i = 0; i < n; ++i)
     {
-      sensor_msgs::Image *p_img = new sensor_msgs::Image;
+      std::shared_ptr<sensor_msgs::msg::Image> p_img = std::make_shared<sensor_msgs::msg::Image>();
       p_img->data.resize(payload_size_bytes_);
       ArvBuffer *buffer = arv_buffer_new(payload_size_bytes_, p_img->data.data());
-      sensor_msgs::ImagePtr img_ptr(
-          p_img, boost::bind(&CameraBufferPool::reclaim, this->weak_from_this(), boost::placeholders::_1));
-      available_img_buffers_.emplace(p_img->data.data(), img_ptr);
+      // Todo: review this...
+      // std::shared_ptr<sensor_msgs::msg::Image> img_ptr(
+      //     p_img, std::bind(&CameraBufferPool::reclaim, this->weak_from_this(), std::placeholders::_1));
+      // available_img_buffers_.emplace(p_img->data.data(), img_ptr);
       arv_stream_push_buffer(stream_, buffer);
       ++n_buffers_;
     }
-    ROS_INFO_STREAM("Allocated " << n << " image buffers of size " << payload_size_bytes_);
+    // RCLCPP_INFO_STREAM(rclcpp::get_logger(),_STREAM("Allocated " << n << " image buffers of size " << payload_size_bytes_);
   }
   else
   {
-    ROS_ERROR("Error: Stream not valid. Failed to allocate buffers.");
+    // RCLCPP_ERROR(rclcpp::get_logger(),"Error: Stream not valid. Failed to allocate buffers.");
   }
 }
 
@@ -128,8 +129,8 @@ void CameraBufferPool::push(sensor_msgs::Image *p_img)
   {
     if (ARV_IS_STREAM(stream_))
     {
-      sensor_msgs::ImagePtr img_ptr(
-          p_img, boost::bind(&CameraBufferPool::reclaim, this->weak_from_this(), boost::placeholders::_1));
+      std::shared_ptr<sensor_msgs::msg::Image> img_ptr(
+          p_img, std::bind(&CameraBufferPool::reclaim, this->weak_from_this(), std::placeholders::_1));
       available_img_buffers_.emplace(p_img->data.data(), img_ptr);
       arv_stream_push_buffer(stream_, iter->second);
     }
@@ -143,7 +144,7 @@ void CameraBufferPool::push(sensor_msgs::Image *p_img)
   else
   {
     // this image was not an aravis registered buffer
-    dangling_imgs_.emplace(p_img, boost::bind(&CameraBufferPool::reclaim, this->weak_from_this(), boost::placeholders::_1));
+    dangling_imgs_.emplace(p_img, std::bind(&CameraBufferPool::reclaim, this->weak_from_this(), std::placeholders::_1));
   }
 }
 

@@ -2,12 +2,33 @@ cmake_minimum_required(VERSION 3.8)
 project(ros2_camera_aravis)
 include(FindPkgConfig)
 
-set(CMAKE_CXX_STANDARD 14)
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
+
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 message(TRACE "testing")
+
+set(ROS_DEPENDENCIES
+    rclcpp
+    rclcpp_components
+    rcutils
+    builtin_interfaces
+    std_msgs
+    sensor_msgs
+    tf2
+    tf2_ros
+    image_transport
+    camera_info_manager
+)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -15,12 +36,16 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(rcutils REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(camera_info_manager REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 pkg_search_module(ARAVIS REQUIRED aravis-0.8 aravis-0.6 aravis-0.4 aravis-0.2)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
@@ -42,7 +67,7 @@ message(TRACE "Service files found: ${srv_files}")
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   ${srv_files}
-  DEPENDENCIES builtin_interfaces std_msgs sensor_msgs
+  DEPENDENCIES ${ROS_DEPENDENCIES}
 )
 ament_export_dependencies(rosidl_default_runtime)
 
@@ -58,23 +83,40 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-include_directories(
-  "${CMAKE_CURRENT_SOURCE_DIR}/include"
-  ${ARAVIS_INCLUDE_DIRS}
-  ${GLIB_INCLUDE_DIRS}
-)
+# include_directories(
+#   "${CMAKE_CURRENT_SOURCE_DIR}/include"
+#   ${ARAVIS_INCLUDE_DIRS}
+#   ${GLIB_INCLUDE_DIRS}
+# )
 
-add_executable("${PROJECT_NAME}-node"
+add_library("${PROJECT_NAME}-node"
   src/camera_aravis_nodelet.cpp
   src/camera_buffer_pool.cpp
+)
+
+# target_compile_definitions("${PROJECT_NAME}-node"
+#   PRIVATE "${PROJECT_NAME}-node_DLL")
+
+rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+
+target_link_libraries("${PROJECT_NAME}-node"
+  "${cpp_typesupport_target}"
 )
 
 target_include_directories("${PROJECT_NAME}-node"
   PUBLIC
   ${GLIB_INCLUDE_DIRS}
+  ${ARAVIS_INCLUDE_DIRS}
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies("${PROJECT_NAME}-node" rclcpp std_msgs sensor_msgs)
+ament_target_dependencies("${PROJECT_NAME}-node"
+  ${ROS_DEPENDENCIES}
+)
 
+rclcpp_components_register_nodes("${PROJECT_NAME}-node" "camera_aravis::CameraAravisNodelet")
+
+ament_export_include_directories(include)
+ament_export_libraries("${PROJECT_NAME}-node")
+ament_export_dependencies(${ROS_DEPENDENCIES})
 ament_package()
